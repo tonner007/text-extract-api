@@ -1,0 +1,10 @@
+fastapi
+celery
+redis
+pytesseract
+opencv-python-headless
+pdf2image
+marker-pdf
+uvicorn[standard]
+requests
+python-multipart
