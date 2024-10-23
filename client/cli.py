@@ -28,7 +28,7 @@ def get_result(task_id):
 
 def main():
     parser = argparse.ArgumentParser(description="Upload a file to the OCR endpoint and get the result.")
-    parser.add_argument('--file', type=str, default='examples/rmi-example.pdf', help='Path to the file to upload')
+    parser.add_argument('--file', type=str, default='examples/example-mri.pdf', help='Path to the file to upload')
     args = parser.parse_args()
 
     task_id = upload_file(args.file)
