@@ -4,10 +4,15 @@ FROM python:3.10-slim
 # Set the working directory
 WORKDIR /app
 
-# Install dependencies for OpenCV and other essential packages
-RUN apt-get update && apt-get install -y \
+RUN echo 'Acquire::http::Pipeline-Depth 0;\nAcquire::http::No-Cache true;\nAcquire::BrokenProxy true;\n' > /etc/apt/apt.conf.d/99fixbadproxy
+
+# Clear the APT cache, update package lists, and install dependencies
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && apt-get update --fix-missing \
+    && apt-get install -y \
     libgl1-mesa-glx \
-    libglib2.0-0 \
+    tesseract-ocr \
+    libtesseract-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container
