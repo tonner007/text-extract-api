@@ -48,21 +48,10 @@ async def ocr_status(task_id: str):
     else:
         return {"state": task.state, "status": str(task.info)}
 
-@app.post("/llama_test")
-async def generate_llama(prompt: str):
+@app.post("/ocr/clear_cache")
+async def clear_ocr_cache():
     """
-    Endpoint to generate text using Llama 3.1 model via the Ollama API.
+    Endpoint to clear the OCR result cache in Redis.
     """
-    if not prompt:
-        raise HTTPException(status_code=400, detail="No prompt provided")
-
-    response = requests.post(
-        OLLAMA_API_URL,
-        json={"model": "llama-3.1", "prompt": prompt}
-    )
-
-    if response.status_code != 200:
-        raise HTTPException(status_code=500, detail="Failed to generate text with Ollama API")
-
-    generated_text = response.json().get("generated_text", "")
-    return {"generated_text": generated_text}
+    redis_client.flushdb()
+    return {"status": "OCR cache cleared"}
