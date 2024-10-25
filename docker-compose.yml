@@ -22,7 +22,7 @@ services:
       - redis
       - ollama
     volumes:
-      - ./app:/app  # Mount the app directory to enable auto-reloading
+      - ./app:/app  # Mount the app directory to enable auto-reloading      
 
   celery_worker:
     build: ./app

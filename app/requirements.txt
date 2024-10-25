@@ -4,8 +4,11 @@ redis
 pytesseract
 opencv-python-headless
 pdf2image
+surya-ocr==0.4.14
 marker-pdf==0.2.6
 uvicorn[standard]
 requests
 python-multipart
 pdftext==0.3.7
+requests
+argparse
