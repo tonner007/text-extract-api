@@ -57,15 +57,3 @@ services:
       timeout: 10s
       retries: 3
 
-  client:
-    build: ./client
-    container_name: client
-    environment:
-      - OCR_URL=http://fastapi_app:8000/ocr
-      - RESULT_URL=http://fastapi_app:8000/ocr/result
-    volumes:
-      - ./client:/client
-      - ./examples:/examples
-    command: ["python", "/client/cli.py", "--file", "/examples/example-mri.pdf"]
-    depends_on:
-      - web
