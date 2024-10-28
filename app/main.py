@@ -21,7 +21,7 @@ async def ocr_endpoint(file: UploadFile = File(...), strategy: str = "marker", a
     Endpoint to extract text from an uploaded PDF file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
     """
-    if file.content_type != 'application/pdf':
+    if file.content_type is not None and file.content_type != 'application/pdf':
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDFs are supported.")
 
     pdf_bytes = await file.read()

@@ -9,7 +9,15 @@ def upload_file(file_path, ocr_cache):
     data = {'ocr_cache': ocr_cache}
     response = requests.post(ocr_url, files=files, data=data)
     if response.status_code == 200:
-        return response.json().get('task_id') or response.json().get('text')
+        respObject = response.json()
+        if respObject.get('task_id'):
+            return {
+                        "task_id": respObject.get('task_id')
+            }
+        else:
+            return {
+                        "text": respObject.get('text')
+            }
     else:
         print(f"Failed to upload file: {response.text}")
         return None
@@ -64,12 +72,12 @@ def main():
 
     if args.command == 'upload':
         result = upload_file(args.file, args.ocr_cache)
-        if isinstance(result, str):
+        if result.get('text'):
             print("OCR Result:")
-            print(result)
+            print(result.get('text'))
         elif result:
             print("File uploaded successfully. Waiting for the result...")
-            text_result = get_result(result)
+            text_result = get_result(result.get('task_id'))
             if text_result:
                 print("OCR Result:")
                 print(text_result)
