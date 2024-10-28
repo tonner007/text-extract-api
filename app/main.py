@@ -109,6 +109,7 @@ async def generate_llama(request: OllamaGenerateRequest):
     """
     Endpoint to generate text using Llama 3.1 model (and other models) via the Ollama API.
     """
+    print(request)
     if not request.prompt:
         raise HTTPException(status_code=400, detail="No prompt provided")
 
