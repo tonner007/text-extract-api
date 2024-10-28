@@ -6,6 +6,8 @@ from tasks import ocr_task, OCR_STRATEGIES
 from hashlib import md5
 import redis
 import os
+from pydantic import BaseModel
+
 
 app = FastAPI()
 
@@ -13,7 +15,7 @@ app = FastAPI()
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
 
-OLLAMA_API_URL = os.getenv('OLLAMA_API_URL', "http://ollama:8000/generate")  # URL to call the Ollama API within Docker
+OLLAMA_API_URL = os.getenv('OLLAMA_API_URL', "http://ollama:11434/api/generate")  # URL to call the Ollama API within Docker
 
 @app.post("/ocr")
 async def ocr_endpoint(file: UploadFile = File(...), strategy: str = "marker", async_mode: bool = True, ocr_cache: bool = True):
@@ -77,17 +79,22 @@ async def clear_ocr_cache():
     redis_client.flushdb()
     return {"status": "OCR cache cleared"}
 
+class OllamaRequest(BaseModel):
+    model: str
+    prompt: str
+
+
 @app.post("/llama_test")
-async def generate_llama(prompt: str):
+async def generate_llama(request: OllamaRequest):
     """
-    Endpoint to generate text using Llama 3.1 model via the Ollama API.
+    Endpoint to generate text using Llama 3.1 model (and other models) via the Ollama API.
     """
-    if not prompt:
+    if not request.prompt:
         raise HTTPException(status_code=400, detail="No prompt provided")
 
     response = requests.post(
         OLLAMA_API_URL,
-        json={"model": "llama-3.1", "prompt": prompt}
+        json={"model": request.model, "prompt": request.prompt}
     )
 
     if response.status_code != 200:
