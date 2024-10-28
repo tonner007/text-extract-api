@@ -78,18 +78,15 @@ def main():
     if args.command == 'upload':
         result = upload_file(args.file, args.ocr_cache)
         if result.get('text'):
-            print("OCR Result:")
             print(result.get('text'))
         elif result:
             print("File uploaded successfully. Task Id: " + result.get('task_id') +  " Waiting for the result...")
             text_result = get_result(result.get('task_id'))
             if text_result:
-                print("OCR Result:")
                 print(text_result)
     elif args.command == 'result':
         text_result = get_result(args.task_id)
         if text_result:
-            print("OCR Result:")
             print(text_result)
     elif args.command == 'clear_cache':
         clear_cache()
