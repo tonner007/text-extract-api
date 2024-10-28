@@ -16,7 +16,7 @@ services:
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - OLLAMA_API_URL=http://ollama:11434/api/generate
+      - OLLAMA_API_URL=http://ollama:11434/api
       - APP_ENV=development  # Default to development mode
     depends_on:
       - redis

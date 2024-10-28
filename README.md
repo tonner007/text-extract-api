@@ -35,7 +35,7 @@ Then modify the variables inside the file:
 
 ```bash
 REDIS_CACHE_URL=redis://redis:6379/1
-OLLAMA_API_URL=http://ollama:8000/generate
+OLLAMA_API_URL=http://ollama:11434/api
 
 # CLI settings
 OCR_URL=http://localhost:8000/ocr

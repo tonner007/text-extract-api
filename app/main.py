@@ -1,3 +1,4 @@
+from urllib import parse
 import requests
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from celery.result import AsyncResult
@@ -15,7 +16,7 @@ app = FastAPI()
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
 
-OLLAMA_API_URL = os.getenv('OLLAMA_API_URL', "http://ollama:11434/api/generate")  # URL to call the Ollama API within Docker
+OLLAMA_API_URL = os.getenv('OLLAMA_API_URL', "http://ollama:11434/api")  # URL to call the Ollama API within Docker
 
 @app.post("/ocr")
 async def ocr_endpoint(file: UploadFile = File(...), strategy: str = "marker", async_mode: bool = True, ocr_cache: bool = True):
@@ -79,13 +80,32 @@ async def clear_ocr_cache():
     redis_client.flushdb()
     return {"status": "OCR cache cleared"}
 
-class OllamaRequest(BaseModel):
+class OllamaGenerateRequest(BaseModel):
     model: str
     prompt: str
 
+class OllamaPullRequest(BaseModel):
+    model: str
+
+@app.post("/llama_pull")
+async def pull_llama(request: OllamaPullRequest):
+    """
+    Endpoint to pull the latest Llama model from the Ollama API.
+    """
+    print("Pulling " + request.model)
+    response = requests.post(
+        parse.urljoin(OLLAMA_API_URL, "api/pull"),
+        json={"name": request.model}
+    )
+
+    print(response.text)
+    if response.status_code != 200:
+        raise HTTPException(status_code=500, detail="Failed to pull Llama model from Ollama API")
+
+    return {"status": "Model pulled successfully"}
 
 @app.post("/llama_test")
-async def generate_llama(request: OllamaRequest):
+async def generate_llama(request: OllamaGenerateRequest):
     """
     Endpoint to generate text using Llama 3.1 model (and other models) via the Ollama API.
     """
@@ -93,7 +113,7 @@ async def generate_llama(request: OllamaRequest):
         raise HTTPException(status_code=400, detail="No prompt provided")
 
     response = requests.post(
-        OLLAMA_API_URL,
+        parse.urljoin(OLLAMA_API_URL, "api/generate"),
         json={"model": request.model, "prompt": request.prompt}
     )
 
