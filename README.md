@@ -4,6 +4,8 @@ Convert any image or PDF to Markdown text or JSON structured document with super
 
 The API is built with FastAPI and uses Celery for asynchronous task processing. Redis is used for caching OCR results.
 
+![hero doc extract](ocr-hero.webp)
+
 ## Features:
 - **PDF to Markdown** conversion with very high accuracy using different OCR strategies including [marker](https://github.com/VikParuchuri/marker), [surya-ocr](https://github.com/VikParuchuri/surya) or [tessereact](https://github.com/h/pytesseract)
 - **PDF to JSON** conversion using Ollama supported models (eg. LLama 3.1)
@@ -95,16 +97,30 @@ Example:
 curl -X POST "http://localhost:8000/ocr/clear_cache"
 ```
 
+
+### Ollama Pull Endpoint
+- **URL**: /llama_pull
+- **Method**: POST
+- **Parameters**:
+  - **model**: Pull the model you are to use first
+
+Example:
+
+```bash
+curl -X POST "http://localhost:8000/llama_pull" -H "Content-Type: application/json" -d '{"model": "llama3.1"}'
+```
+
 ### Ollama Endpoint
 - **URL**: /llama_test
 - **Method**: POST
 - **Parameters**:
   - **prompt**: Prompt for the Ollama model.
+  - **model**: Model you like to query
 
 Example:
 
 ```bash
-curl -X POST "http://localhost:8000/llama_test" -H "Content-Type: application/json" -d '{"prompt": "Your prompt here"}'
+curl -X POST "http://localhost:8000/llama_test" -H "Content-Type: application/json" -d '{"prompt": "Your prompt here", "model":"llama3.1"}'
 ```
 
 ## CLI tool
@@ -132,6 +148,12 @@ python client/cli.py result -task_id {your_task_id_from_upload_step}
 
 ```bash
 python client/cli.py clear_cache
+```
+
+### Pull LLama model
+
+```bash
+python ollama_pull --model llama3.1
 ```
 
 ### Test LLama
