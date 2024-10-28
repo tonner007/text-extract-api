@@ -10,13 +10,13 @@ import os
 app = FastAPI()
 
 # Connect to Redis
-redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/1')
+redis_url = os.getenv('REDIS_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
 
 OLLAMA_API_URL = "http://ollama:8000/generate"  # URL to call the Ollama API within Docker
 
 @app.post("/ocr")
-async def ocr_endpoint(file: UploadFile = File(...), strategy: str = "marker", async_mode: bool = True, ocr_cache: bool = False):
+async def ocr_endpoint(file: UploadFile = File(...), strategy: str = "marker", async_mode: bool = True, ocr_cache: bool = True):
     """
     Endpoint to extract text from an uploaded PDF file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
