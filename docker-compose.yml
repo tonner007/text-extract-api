@@ -50,9 +50,9 @@ services:
     tty: true
     restart: always
     ports:
-      - "8001:8001"  # Expose Ollama's API port, changing internal to external port
+      - "11434:11434"  # Expose Ollama's API port, changing internal to external port
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]  # Assumes health endpoint exists
+      test: ["CMD", "curl", "-f", "http://localhost:11434/health"]  # Assumes health endpoint exists
       interval: 30s
       timeout: 10s
       retries: 3
