@@ -61,6 +61,11 @@ def main():
     upload_parser.add_argument('--file', type=str, default='examples/rmi-example.pdf', help='Path to the file to upload')
     upload_parser.add_argument('--ocr_cache', action='store_true', help='Enable OCR result caching')
 
+    # Sub-command for getting the result
+    upload_parser = subparsers.add_parser('result', help='Get the OCR result by specified task id.')
+    upload_parser.add_argument('--task_id', type=str, help='Task Id returned by the upload command')
+
+
     # Sub-command for clearing the cache
     clear_cache_parser = subparsers.add_parser('clear_cache', help='Clear the OCR result cache')
 
@@ -76,11 +81,16 @@ def main():
             print("OCR Result:")
             print(result.get('text'))
         elif result:
-            print("File uploaded successfully. Waiting for the result...")
+            print("File uploaded successfully. Task Id: " + result.get('task_id') +  " Waiting for the result...")
             text_result = get_result(result.get('task_id'))
             if text_result:
                 print("OCR Result:")
                 print(text_result)
+    elif args.command == 'result':
+        text_result = get_result(args.task_id)
+        if text_result:
+            print("OCR Result:")
+            print(text_result)
     elif args.command == 'clear_cache':
         clear_cache()
     elif args.command == 'ollama':
