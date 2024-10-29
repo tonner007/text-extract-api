@@ -56,7 +56,7 @@ async def ocr_status(task_id: str):
     if task.state == 'PENDING':
         return {"state": task.state, "status": "Task is pending..."}
     elif task.state == 'PROGRESS':
-        return {"state": task.state, "status": "Task is in progress...", "progress": task.info.get('progress', 0)}
+        return {"state": task.state, "status": task.info.get("status"), "info": task.info } 
     elif task.state == 'SUCCESS':
         return {"state": task.state, "status": "Task completed successfully.", "result": task.result}
     else:

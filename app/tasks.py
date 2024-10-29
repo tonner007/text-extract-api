@@ -38,25 +38,24 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_hash, ocr_cache, prompt, model)
     if extracted_text is None:
         print("Extracting text from PDF...")
         elapsed_time = time.time() - start_time
-        self.update_state(state='PROGRESS', meta={'progress': 30, 'status': 'Extracting text from PDF', 'elapsed_time': time.time() - start_time})  # Example progress update
+        self.update_state(state='PROGRESS', meta={'progress': 30, 'status': 'Extracting text from PDF', 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
         extracted_text = ocr_strategy.extract_text_from_pdf(pdf_bytes)
     else:
         print("Using cached result...")
 
-    self.update_state(state='PROGRESS', meta={'progress': 50, 'status': 'Text extracted', 'elapsed_time': time.time() - start_time})  # Example progress update
+    self.update_state(state='PROGRESS', meta={'progress': 50, 'status': 'Text extracted', 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
 
     if prompt:
         print("Transforming text using LLM...")
-        self.update_state(state='PROGRESS', meta={'progress': 75, 'status': 'Processing LLM', 'elapsed_time': time.time() - start_time})  # Example progress update
+        self.update_state(state='PROGRESS', meta={'progress': 75, 'status': 'Processing LLM', 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
         llm_resp = ollama.generate(model, prompt + extracted_text, stream=True)
         num_chunk = 1
         for chunk in llm_resp:
-            print(chunk)
-            self.update_state(state='PROGRESS', meta={'progress': num_chunk , 'status': 'LLM Processing chunk no: ' + num_chunk, 'elapsed_time': time.time() - start_time})  # Example progress update
+            self.update_state(state='PROGRESS', meta={'progress': num_chunk , 'status': 'LLM Processing chunk no: ' + str(num_chunk), 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
             num_chunk += 1
-            extracted_text += chunk['message']['content'].decode('utf-8')
+            extracted_text += chunk['response']
 
-    self.update_state(state='DONE', meta={'progress': 100 , 'status': 'Processing done!', 'elapsed_time': time.time() - start_time})  # Example progress update
+    self.update_state(state='DONE', meta={'progress': 100 , 'status': 'Processing done!', 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
 
     if ocr_cache:
         redis_client.set(pdf_hash, extracted_text)

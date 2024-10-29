@@ -37,10 +37,13 @@ def get_result(task_id, print_progress = False):
     result_url = os.getenv('RESULT_URL', f'http://localhost:8000/ocr/result/{task_id}')
     while True:
         response = requests.get(result_url)
+        result = response.json()
         if print_progress:
-            print(response.json())
+            task_info = result['info']
+            if task_info['start_time']:
+                task_info['elapsed_time'] = time.time() - int(task_info['start_time'])
+            print(result)
         if response.status_code == 200:
-            result = response.json()
             if result['state'] == 'SUCCESS':
                 return result['result']
             elif result['state'] == 'FAILURE':
