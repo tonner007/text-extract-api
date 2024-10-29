@@ -1,4 +1,4 @@
-# pdf-json-extract
+# pdf-extract-api
 
 Convert any image or PDF to Markdown text or JSON structured document with super-high accuracy, including tabular data, numbers or math formulas.
 
