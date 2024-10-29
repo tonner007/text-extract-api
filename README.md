@@ -7,8 +7,11 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 ![hero doc extract](ocr-hero.webp)
 
 ## Features:
+- **No Cloud/external dependencies** all you need: PyTorch based OCR (Marker) + Ollama are shipped and configured via `docker-compose` no data is sent outside your dev/server environment,
 - **PDF to Markdown** conversion with very high accuracy using different OCR strategies including [marker](https://github.com/VikParuchuri/marker), [surya-ocr](https://github.com/VikParuchuri/surya) or [tessereact](https://github.com/h/pytesseract)
 - **PDF to JSON** conversion using Ollama supported models (eg. LLama 3.1)
+- **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
+- **Removing PII** This tool can be used for removing Personally Identifiable Information out of PDF - see `examples`
 - **Distributed queue processing** using [Celery][(](https://docs.celeryq.dev/en/stable/getting-started/introduction.html))
 - **Caching** using Redis - the OCR results can be easily cached prior to LLM processing
 - **CLI tool** for sending tasks and processing results 
