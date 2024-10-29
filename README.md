@@ -133,7 +133,6 @@ python llm_generate --prompt "Your prompt here"
 - **Parameters**:
   - **file**: PDF file to be processed.
   - **strategy**: OCR strategy to use (`marker` or `tesseract`).
-  - **async_mode**: Whether to process the file asynchronously (true or false).
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result
   - **model**: When provided along with the prompt - this model will be used for LLM processing
@@ -141,7 +140,7 @@ python llm_generate --prompt "Your prompt here"
 Example:
 
 ```bash
-curl -X POST "http://localhost:8000/ocr" -F "file=examples/example-mri.pdf" -F "strategy=marker" -F "async_mode=true" -F "ocr_cache=true"
+curl -X POST "http://localhost:8000/ocr" -F "file=examples/example-mri.pdf" -F "strategy=marker" -F "ocr_cache=true"
 ```
 
 ### OCR Result Endpoint
