@@ -16,6 +16,19 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 - **Caching** using Redis - the OCR results can be easily cached prior to LLM processing
 - **CLI tool** for sending tasks and processing results 
 
+## Screenshots
+
+Converting MRI report to Markdown + JSON.
+
+```bash 
+python client/cli.py ocr --file examples/example-mri.pdf --prompt_file examples/example-mri-2-json-prompt.txt
+```
+
+Before running the example see [getting started](#getting-started)
+
+![Converting MRI report to Markdown](./screenshots/example-1.png)
+
+
 ## Getting started
 
 ### Prerequisites
@@ -62,6 +75,56 @@ This will start the following services:
  - **Redis**: Caches OCR results.
  - **Ollama**: Runs the Ollama model.
 
+
+## CLI tool
+
+The project includes a CLI for interacting with the API. To make it work first run:
+
+```bash
+cd client
+pip install -r requirements.txt
+```
+
+### Pull the LLama3.1 model
+
+You might want to test out [different models supported by LLama](https://ollama.com/library)
+
+```bash
+python client/cli.py llm_pull --model llama3.1
+```
+
+
+### Upload a File for OCR (converting to Markdown)
+
+```bash
+python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache
+```
+
+
+### Upload a File for OCR (processing by LLM)
+
+```bash
+python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
+```
+
+### Get OCR Result by Task ID
+
+```bash
+python client/cli.py result -task_id {your_task_id_from_upload_step}
+```
+
+### Clear OCR Cache
+
+```bash
+python client/cli.py clear_cache
+```
+
+### Test LLama
+
+```bash
+python llm_generate --prompt "Your prompt here"
+```
+
 ## Endpoints
 
 ### OCR Endpoint
@@ -69,9 +132,11 @@ This will start the following services:
 - **Method**: POST
 - **Parameters**:
   - **file**: PDF file to be processed.
-  - **strategy**: OCR strategy to use (marker or tesseract).
+  - **strategy**: OCR strategy to use (`marker` or `tesseract`).
   - **async_mode**: Whether to process the file asynchronously (true or false).
   - **ocr_cache**: Whether to cache the OCR result (true or false).
+  - **prompt**: When provided, will be used for Ollama processing the OCR result
+  - **model**: When provided along with the prompt - this model will be used for LLM processing
 
 Example:
 
@@ -124,45 +189,6 @@ Example:
 
 ```bash
 curl -X POST "http://localhost:8000/llama_generate" -H "Content-Type: application/json" -d '{"prompt": "Your prompt here", "model":"llama3.1"}'
-```
-
-## CLI tool
-
-The project includes a CLI for interacting with the API. To make it work first run:
-
-```bash
-cd client
-pip install -r requirements.txt
-```
-
-### Upload a File for OCR
-
-```bash
-python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache
-```
-
-### Get OCR Result by Task ID
-
-```bash
-python client/cli.py result -task_id {your_task_id_from_upload_step}
-```
-
-### Clear OCR Cache
-
-```bash
-python client/cli.py clear_cache
-```
-
-### Pull LLama model
-
-```bash
-python llm_pull --model llama3.1
-```
-
-### Test LLama
-
-```bash
-python llm_generate --prompt "Your prompt here"
 ```
 
 ## License

@@ -1,7 +1,7 @@
 | Maywood, NJ 0000   |
 |--------------------|
 
-# Ikengil Radiology Associa
+# Ikengil Radiology Associates
 
 DikengilRadiologyAssociates.com | 201-725-0913 Phil Referrer, M. D.
 
