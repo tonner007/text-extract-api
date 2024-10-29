@@ -3,29 +3,42 @@ import requests
 import time
 import os
 
-def upload_file(file_path, ocr_cache):
+def upload_file(file_path, ocr_cache, prompt, prompt_file = None, model = 'llama3.1', strategy = 'marker'):
     ocr_url = os.getenv('OCR_URL', 'http://localhost:8000/ocr')
     files = {'file': open(file_path, 'rb')}
-    data = {'ocr_cache': ocr_cache}
+    data = {'ocr_cache': ocr_cache, 'model': model, 'strategy': strategy }
+
+    try:
+        if prompt_file:
+            prompt = open(prompt_file, 'r').read()
+    except FileNotFoundError:
+        print(f"Prompt file not found: {prompt_file}")
+        return None
+    
+    if prompt:
+        data['prompt'] = prompt
+
     response = requests.post(ocr_url, files=files, data=data)
     if response.status_code == 200:
         respObject = response.json()
         if respObject.get('task_id'):
             return {
-                        "task_id": respObject.get('task_id')
+                "task_id": respObject.get('task_id')
             }
         else:
             return {
-                        "text": respObject.get('text')
+                "text": respObject.get('text') # sync mode support
             }
     else:
         print(f"Failed to upload file: {response.text}")
         return None
 
-def get_result(task_id):
+def get_result(task_id, print_progress = False):
     result_url = os.getenv('RESULT_URL', f'http://localhost:8000/ocr/result/{task_id}')
     while True:
         response = requests.get(result_url)
+        if print_progress:
+            print(response.json())
         if response.status_code == 200:
             result = response.json()
             if result['state'] == 'SUCCESS':
@@ -64,13 +77,20 @@ def main():
     subparsers = parser.add_subparsers(dest='command', help='Sub-command help')
 
     # Sub-command for uploading a file
-    upload_parser = subparsers.add_parser('upload', help='Upload a file to the OCR endpoint and get the result.')
-    upload_parser.add_argument('--file', type=str, default='examples/rmi-example.pdf', help='Path to the file to upload')
-    upload_parser.add_argument('--ocr_cache', action='store_true', help='Enable OCR result caching')
+    ocr_parser = subparsers.add_parser('ocr', help='Upload a file to the OCR endpoint and get the result.')
+    ocr_parser.add_argument('--file', type=str, default='examples/rmi-example.pdf', help='Path to the file to upload')
+    ocr_parser.add_argument('--ocr_cache', default=True, action='store_true', help='Enable OCR result caching')
+    ocr_parser.add_argument('--prompt', type=str, default=None, help='Prompt used for the Ollama model to fix or transform the file')
+    ocr_parser.add_argument('--prompt_file', default=None, type=str, help='Prompt file name used for the Ollama model to fix or transform the file')
+    ocr_parser.add_argument('--model', type=str, default='llama3.1', help='Model to use for the Ollama endpoint')
+    ocr_parser.add_argument('--strategy', type=str, default='marker', help='OCR strategy to use for the file')
+    ocr_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
+    #ocr_parser.add_argument('--async_mode', action='store_true', help='Enable async mode for the OCR task')
 
     # Sub-command for getting the result
-    upload_parser = subparsers.add_parser('result', help='Get the OCR result by specified task id.')
-    upload_parser.add_argument('--task_id', type=str, help='Task Id returned by the upload command')
+    ocr_parser = subparsers.add_parser('result', help='Get the OCR result by specified task id.')
+    ocr_parser.add_argument('--task_id', type=str, help='Task Id returned by the upload command')
+    ocr_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
 
 
     # Sub-command for clearing the cache
@@ -87,17 +107,21 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command == 'upload':
-        result = upload_file(args.file, args.ocr_cache)
+    if args.command == 'ocr':
+        print(args)
+        result = upload_file(args.file, args.ocr_cache, args.prompt, args.prompt_file, args.model)
+        if result is None:
+            print("Error uploading file.")
+            return
         if result.get('text'):
             print(result.get('text'))
         elif result:
             print("File uploaded successfully. Task Id: " + result.get('task_id') +  " Waiting for the result...")
-            text_result = get_result(result.get('task_id'))
+            text_result = get_result(result.get('task_id'), args.print_progress)
             if text_result:
                 print(text_result)
     elif args.command == 'result':
-        text_result = get_result(args.task_id)
+        text_result = get_result(args.task_id, args.print_progress)
         if text_result:
             print(text_result)
     elif args.command == 'clear_cache':

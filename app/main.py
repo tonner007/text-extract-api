@@ -1,6 +1,6 @@
 from urllib import parse
 import requests
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, Form, Request, UploadFile, File, HTTPException
 from celery.result import AsyncResult
 from celery_config import celery
 from tasks import ocr_task, OCR_STRATEGIES
@@ -17,9 +17,14 @@ app = FastAPI()
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
 
-
 @app.post("/ocr")
-async def ocr_endpoint(file: UploadFile = File(...), strategy: str = "marker", async_mode: bool = True, ocr_cache: bool = True):
+async def ocr_endpoint(
+    strategy: str = Form(...),
+    prompt: str = Form(...),
+    model: str = Form(...),
+    file: UploadFile = File(...),
+    ocr_cache: bool = Form(...)
+):    
     """
     Endpoint to extract text from an uploaded PDF file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
@@ -32,29 +37,14 @@ async def ocr_endpoint(file: UploadFile = File(...), strategy: str = "marker", a
     # Generate a hash of the PDF content for caching
     pdf_hash = md5(pdf_bytes).hexdigest()
 
-    if ocr_cache:
-        cached_result = redis_client.get(pdf_hash)
-        if cached_result:
-            # Return cached result if available
-            return {"text": cached_result.decode('utf-8')}
-
     if strategy not in OCR_STRATEGIES:
         raise HTTPException(status_code=400, detail=f"Unknown strategy '{strategy}'. Available: marker, tesseract")
 
-    if async_mode:
-        # Asynchronous processing using Celery
-        task = ocr_task.apply_async(args=[pdf_bytes, strategy])
-        return {"task_id": task.id}
-    else:
-        # Synchronous processing
-        ocr_strategy = OCR_STRATEGIES[strategy]
-        extracted_text = ocr_strategy.extract_text_from_pdf(pdf_bytes)
-        
-        if ocr_cache:
-            # Cache the result
-            redis_client.set(pdf_hash, extracted_text)
-        
-        return {"text": extracted_text}
+    print(f"Processing PDF {file.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}")
+
+    # Asynchronous processing using Celery
+    task = ocr_task.apply_async(args=[pdf_bytes, strategy, pdf_hash, ocr_cache, prompt, model])
+    return {"task_id": task.id}
 
 @app.get("/ocr/result/{task_id}")
 async def ocr_status(task_id: str):

@@ -135,7 +135,7 @@ pip install -r requirements.txt
 ### Upload a File for OCR
 
 ```bash
-python client/cli.py upload --file examples/example-mri.pdf --ocr_cache
+python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache
 ```
 
 ### Get OCR Result by Task ID
