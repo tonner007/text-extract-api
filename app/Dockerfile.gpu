@@ -36,6 +36,7 @@ RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url https:/
 # Set the working directory
 WORKDIR /app
 
+
 RUN echo 'Acquire::http::Pipeline-Depth 0;\nAcquire::http::No-Cache true;\nAcquire::BrokenProxy true;\n' > /etc/apt/apt.conf.d/99fixbadproxy
 
 # Clear the APT cache, update package lists, and install dependencies
