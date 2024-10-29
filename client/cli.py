@@ -39,9 +39,6 @@ def get_result(task_id, print_progress = False):
         response = requests.get(result_url)
         result = response.json()
         if print_progress:
-            task_info = result['info']
-            if task_info['start_time']:
-                task_info['elapsed_time'] = time.time() - int(task_info['start_time'])
             print(result)
         if response.status_code == 200:
             if result['state'] == 'SUCCESS':

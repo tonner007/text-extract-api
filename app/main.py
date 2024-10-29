@@ -1,3 +1,4 @@
+import time
 from urllib import parse
 import requests
 from fastapi import FastAPI, Form, Request, UploadFile, File, HTTPException
@@ -56,7 +57,10 @@ async def ocr_status(task_id: str):
     if task.state == 'PENDING':
         return {"state": task.state, "status": "Task is pending..."}
     elif task.state == 'PROGRESS':
-        return {"state": task.state, "status": task.info.get("status"), "info": task.info } 
+        task_info = task.info
+        if task_info.get('start_time'):
+            task_info['elapsed_time'] = time.time() - int(task_info.get('start_time'))
+        return {"state": task.state, "status": task.info.get("status"), "info": task_info } 
     elif task.state == 'SUCCESS':
         return {"state": task.state, "status": "Task completed successfully.", "result": task.result}
     else:
