@@ -43,10 +43,14 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_hash, ocr_cache, prompt, model)
     else:
         print("Using cached result...")
 
-    self.update_state(state='PROGRESS', meta={'progress': 50, 'status': 'Text extracted', 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
+    print("Extracted text: " + extracted_text)
+    self.update_state(state='PROGRESS', meta={'progress': 50, 'status': 'Text extracted', 'extracted_text': extracted_text, 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
+
+    if ocr_cache:
+        redis_client.set(pdf_hash, extracted_text)
 
     if prompt:
-        print("Transforming text using LLM...")
+        print("Transforming text using LLM (prompt={prompt}, model={model}) ...")
         self.update_state(state='PROGRESS', meta={'progress': 75, 'status': 'Processing LLM', 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
         llm_resp = ollama.generate(model, prompt + extracted_text, stream=True)
         num_chunk = 1
@@ -57,7 +61,5 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_hash, ocr_cache, prompt, model)
 
     self.update_state(state='DONE', meta={'progress': 100 , 'status': 'Processing done!', 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
 
-    if ocr_cache:
-        redis_client.set(pdf_hash, extracted_text)
 
     return extracted_text

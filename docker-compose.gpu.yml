@@ -1,6 +1,9 @@
 services:
   web:
-    build: ./app
+    build:
+      context: ./app  # Keep the build context as the root directory
+      dockerfile: ./app/Dockerfile.gpu # Specify the new path to the GPU Dockerfile
+
     container_name: fastapi_app
     command: >
       bash -c "
@@ -23,9 +26,16 @@ services:
       - ollama
     volumes:
       - ./app:/app  # Mount the app directory to enable auto-reloading      
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]  # Request GPU support
 
   celery_worker:
-    build: ./app
+    build:
+      context: ./app  # Keep the build context as the root directory
+      dockerfile: ./app/Dockerfile.gpu # Specify the new path to the GPU Dockerfile
     container_name: celery_worker
     command: celery -A main.celery worker --loglevel=info
     environment:
@@ -36,6 +46,11 @@ services:
       - redis
     volumes:
       - ./app:/app
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]  # Request GPU support
 
   redis:
     image: redis:latest

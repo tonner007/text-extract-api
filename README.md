@@ -28,6 +28,18 @@ Before running the example see [getting started](#getting-started)
 
 ![Converting MRI report to Markdown](./screenshots/example-1.png)
 
+Converting Invoice to JSON and remove PII
+
+```bash 
+python client/cli.py ocr --file examples/example-invoice.pdf --prompt_file examples/example-invoice-remove-pii.txt 
+```
+
+Before running the example see [getting started](#getting-started)
+
+![Converting Invoice to JSON](./screenshots/example-2.png)
+
+**Note:** As you may observe in the example above, `marker-pdf` sometimes mismatches the cols and rows which could have potentially great impact on data accuracy. To improve on it there is a feature request [#3](https://github.com/CatchTheTornado/pdf-extract-api/issues/3) for adding alternative support for [`tabled`](https://github.com/VikParuchuri/tabled) model - which is optimized for tables.
+
 
 ## Getting started
 
@@ -68,6 +80,13 @@ Build and run the Docker containers using Docker Compose:
 ```bash
 docker-compose up --build
 ```
+
+... for GPU support run:
+
+```bash
+docker-compose -f docker-compose.gpu.yml up --build
+```
+
 
 This will start the following services:
  - **FastAPI App**: Runs the FastAPI application.
