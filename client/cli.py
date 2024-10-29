@@ -38,7 +38,7 @@ def get_result(task_id, print_progress = False):
     while True:
         response = requests.get(result_url)
         result = response.json()
-        if print_progress:
+        if result['state'] != 'SUCCESS' and print_progress:
             print(result)
         if response.status_code == 200:
             if result['state'] == 'SUCCESS':
