@@ -1,7 +1,7 @@
 services:
   web:
     build:
-      #context: .  # Keep the build context as the root directory
+      context:  ./app # Keep the build context as the root directory
       dockerfile: ./app/Dockerfile.gpu # Specify the new path to the GPU Dockerfile
 
     container_name: fastapi_app
@@ -34,7 +34,7 @@ services:
 
   celery_worker:
     build:
-      #context: .  # Keep the build context as the root directory
+      context: ./app  # Keep the build context as the root directory
       dockerfile: ./app/Dockerfile.gpu # Specify the new path to the GPU Dockerfile
     container_name: celery_worker
     command: celery -A main.celery worker --loglevel=info
