@@ -4,12 +4,13 @@ redis
 pytesseract
 opencv-python-headless
 pdf2image
-transformers==4.45.2
-surya-ocr==0.4.14
-marker-pdf==0.2.6
+ollama
 uvicorn[standard]
 requests
 python-multipart
 pdftext==0.3.7
 requests
 argparse
+transformers==4.45.2
+surya-ocr==0.4.14
+marker-pdf==0.2.6

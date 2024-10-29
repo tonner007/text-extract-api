@@ -99,7 +99,7 @@ curl -X POST "http://localhost:8000/ocr/clear_cache"
 
 
 ### Ollama Pull Endpoint
-- **URL**: /llama_pull
+- **URL**: /llm_pull
 - **Method**: POST
 - **Parameters**:
   - **model**: Pull the model you are to use first
@@ -111,7 +111,7 @@ curl -X POST "http://localhost:8000/llama_pull" -H "Content-Type: application/js
 ```
 
 ### Ollama Endpoint
-- **URL**: /llama_test
+- **URL**: /llm_generate
 - **Method**: POST
 - **Parameters**:
   - **prompt**: Prompt for the Ollama model.
@@ -120,7 +120,7 @@ curl -X POST "http://localhost:8000/llama_pull" -H "Content-Type: application/js
 Example:
 
 ```bash
-curl -X POST "http://localhost:8000/llama_test" -H "Content-Type: application/json" -d '{"prompt": "Your prompt here", "model":"llama3.1"}'
+curl -X POST "http://localhost:8000/llama_generate" -H "Content-Type: application/json" -d '{"prompt": "Your prompt here", "model":"llama3.1"}'
 ```
 
 ## CLI tool
@@ -153,13 +153,13 @@ python client/cli.py clear_cache
 ### Pull LLama model
 
 ```bash
-python ollama_pull --model llama3.1
+python llm_pull --model llama3.1
 ```
 
 ### Test LLama
 
 ```bash
-python ollama --prompt "Your prompt here"
+python llm_generate --prompt "Your prompt here"
 ```
 
 ## License

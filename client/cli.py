@@ -43,20 +43,19 @@ def clear_cache():
     else:
         print(f"Failed to clear OCR cache: {response.text}")
 
-def pull_llama(model = 'llama3.1'):
-    ollama_pull_url = os.getenv('OLLAMA_API_URL', 'http://localhost:8000/llama_pull')
+def llm_pull(model = 'llama3.1'):
+    ollama_pull_url = os.getenv('LLM_PULL_API_URL', 'http://localhost:8000/llm_pull')
     response = requests.post(ollama_pull_url, json={"model": model})
     if response.status_code == 200:
         print("Model pulled successfully.")
     else:
         print(f"Failed to pull the model: {response.text}")
 
-def run_ollama(prompt, model = 'llama3.1'):
-    ollama_url = os.getenv('OLLAMA_API_URL', 'http://localhost:8000/llama_test')
+def llm_generate(prompt, model = 'llama3.1'):
+    ollama_url = os.getenv('LLM_GENERATE_API_URL', 'http://localhost:8000/llm_generate')
     response = requests.post(ollama_url, json={"model": model, "prompt": prompt})
     if response.status_code == 200:
-        print("Ollama Result:")
-        print(response.json())
+        print(response.json().get('generated_text'))
     else:
         print(f"Failed to generate text: {response.text}")
 
@@ -78,11 +77,11 @@ def main():
     clear_cache_parser = subparsers.add_parser('clear_cache', help='Clear the OCR result cache')
 
     # Sub-command for running Ollama
-    ollama_parser = subparsers.add_parser('ollama', help='Run the Ollama endpoint')
+    ollama_parser = subparsers.add_parser('llm_generate', help='Run the Ollama endpoint')
     ollama_parser.add_argument('--prompt', type=str, required=True, help='Prompt for the Ollama model')
     ollama_parser.add_argument('--model', type=str, default='llama3.1', help='Model to use for the Ollama endpoint')
 
-    ollama_pull_parser = subparsers.add_parser('ollama_pull', help='Pull the latest Llama model from the Ollama API')   
+    ollama_pull_parser = subparsers.add_parser('llm_pull', help='Pull the latest Llama model from the Ollama API')   
     ollama_pull_parser.add_argument('--model', type=str, default='llama3.1', help='Model to pull from the Ollama API')
 
 
@@ -103,10 +102,10 @@ def main():
             print(text_result)
     elif args.command == 'clear_cache':
         clear_cache()
-    elif args.command == 'ollama':
-        run_ollama(args.prompt, args.model)
-    elif args.command == 'ollama_pull':
-        pull_llama(args.model)
+    elif args.command == 'llm_generate':
+        llm_generate(args.prompt, args.model)
+    elif args.command == 'llm_pull':
+        llm_pull(args.model)
     else:
         parser.print_help()
 
