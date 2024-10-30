@@ -95,6 +95,10 @@ This will start the following services:
  - **Ollama**: Runs the Ollama model.
 
 
+## Hosted edition
+
+If the on-prem is too much hassle [ask us about the hosted/cloud edition](mailto:info@catchthetornado.com?subject=pdf-extract-api%20but%20hosted) of pdf-extract-api, we can setup it you, billed just for the usage.
+
 ## CLI tool
 
 The project includes a CLI for interacting with the API. To make it work first run:
