@@ -51,8 +51,8 @@ Before running the example see [getting started](#getting-started)
 ### Clone the Repository
 
 ```sh
-git clone https://github.com/CatchTheTornado/doc-extract-api.git
-cd doc-extract-api
+git clone https://github.com/CatchTheTornado/pdf-extract-api.git
+cd pdf-extract-api
 ```
 
 ### Setup environmental variables
