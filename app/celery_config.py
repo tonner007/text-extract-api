@@ -1,4 +1,7 @@
 from celery import Celery
+import multiprocessing
+
+multiprocessing.set_start_method("spawn")
 
 def make_celery():
     celery = Celery(
