@@ -21,7 +21,7 @@ class GoogleDriveStorageStrategy(StorageStrategy):
     def save(self, file_name, dest_file_name, content):
         # Save content to a temporary file
         with open(file_name, 'wb') as temp_file:
-            temp_file.write(content)
+            temp_file.write(content.encode('utf-8'))  # Encode the string to bytes
         
         file_metadata = {
             'name': dest_file_name,
