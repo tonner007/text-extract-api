@@ -3,6 +3,7 @@ import yaml
 from storage_strategies.local_filesystem import LocalFilesystemStorageStrategy
 from storage_strategies.google_drive import GoogleDriveStorageStrategy
 from pathlib import Path
+
 class StorageManager:
     def __init__(self, profile_name):
         profile_path = os.path.join(os.getenv('STORAGE_PROFILE_PATH', '/storage_profiles'), f'{profile_name}.yaml')

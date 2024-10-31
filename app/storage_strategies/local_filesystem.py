@@ -43,7 +43,11 @@ class LocalFilesystemStorageStrategy(StorageStrategy):
             return file.read()
 
     def list(self):
-        return os.listdir(self.base_directory)
+        all_files = []
+        for root, dirs, files in os.walk(self.base_directory):
+            for file in files:
+                all_files.append(os.path.join(root, file))
+        return all_files
 
     def delete(self, file_name):
         subfolder_path = self._get_subfolder_path(file_name)

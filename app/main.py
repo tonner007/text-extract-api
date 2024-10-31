@@ -3,6 +3,7 @@ from urllib import parse
 import requests
 from fastapi import FastAPI, Form, Request, UploadFile, File, HTTPException
 from celery.result import AsyncResult
+from storage_manager import StorageManager
 from celery_config import celery
 from tasks import ocr_task, OCR_STRATEGIES
 from hashlib import md5
@@ -83,7 +84,34 @@ class OllamaGenerateRequest(BaseModel):
 class OllamaPullRequest(BaseModel):
     model: str
 
-@app.post("/llm_pull")
+@app.get("/storage/list")
+async def list_files(storage_profile: str = 'default'):
+    """
+    Endpoint to list files using the selected storage profile.
+    """
+    storage_manager = StorageManager(storage_profile)
+    files = storage_manager.list()
+    return {"files": files}
+
+@app.get("/storage/load")
+async def load_file(file_name: str, storage_profile: str = 'default'):
+    """
+    Endpoint to load a file using the selected storage profile.
+    """
+    storage_manager = StorageManager(storage_profile)
+    content = storage_manager.load(file_name)
+    return {"content": content}
+
+@app.delete("/storage/delete")
+async def delete_file(file_name: str, storage_profile: str = 'default'):
+    """
+    Endpoint to delete a file using the selected storage profile.
+    """
+    storage_manager = StorageManager(storage_profile)
+    storage_manager.delete(file_name)
+    return {"status": f"File {file_name} deleted successfully"}
+
+@app.post("/llm/pull")
 async def pull_llama(request: OllamaPullRequest):
     """
     Endpoint to pull the latest Llama model from the Ollama API.
@@ -97,7 +125,7 @@ async def pull_llama(request: OllamaPullRequest):
 
     return {"status": response.get("status", "Model pulled successfully")}
 
-@app.post("/llm_generate")
+@app.post("/llm/generate")
 async def generate_llama(request: OllamaGenerateRequest):
     """
     Endpoint to generate text using Llama 3.1 model (and other models) via the Ollama API.

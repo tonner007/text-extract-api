@@ -29,7 +29,8 @@ class GoogleDriveStorageStrategy(StorageStrategy):
         }
         if self.folder_id:
             file_metadata['parents'] = [self.folder_id]
-            
+
+        print(file_metadata)
         media = MediaFileUpload(file_name, resumable=True)
         file = self.service.files().create(body=file_metadata, media_body=media, fields='id').execute()
         print(f"File ID: {file.get('id')}")
@@ -38,7 +39,9 @@ class GoogleDriveStorageStrategy(StorageStrategy):
         os.remove(file_name)
 
     def load(self, file_name):
-        query = f"name = '{file_name}' and '{self.folder_id}' in parents"
+        query = f"name = '{file_name}'"
+        if self.folder_id:
+            query += f" and '{self.folder_id}' in parents"
         results = self.service.files().list(q=query, spaces='drive', fields='files(id, name)').execute()
         items = results.get('files', [])
         if not items:
@@ -56,13 +59,17 @@ class GoogleDriveStorageStrategy(StorageStrategy):
         return fh.read()
 
     def list(self):
-        query = f"'{self.folder_id}' in parents"
+        query = "" #"mimeType='application/vnd.google-apps.file'"
+        if self.folder_id:
+            query = f"'{self.folder_id}' in parents"
         results = self.service.files().list(q=query, spaces='drive', fields='files(id, name)').execute()
         items = results.get('files', [])
         return [item['name'] for item in items]
 
     def delete(self, file_name):
-        query = f"name = '{file_name}' and '{self.folder_id}' in parents"
+        query = f"name = '{file_name}'"
+        if self.folder_id:
+            query += f" and '{self.folder_id}' in parents"
         results = self.service.files().list(q=query, spaces='drive', fields='files(id, name)').execute()
         items = results.get('files', [])
         if not items:
