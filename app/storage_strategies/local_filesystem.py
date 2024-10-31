@@ -24,27 +24,11 @@ class LocalFilesystemStorageStrategy(StorageStrategy):
             return self.base_directory
         
         now = datetime.now()
-        subfolder_path = self.subfolder_names_format.format(
-            file_name=file_name,
-            Y=now.strftime('%Y'),
-            mm=now.strftime('%m'),
-            dd=now.strftime('%d'),
-            HH=now.strftime('%H'),
-            MM=now.strftime('%M'),
-            SS=now.strftime('%S')
-        )
+        subfolder_path = self.format_file_name(file_name, self.subfolder_names_format)
         return os.path.join(self.base_directory, subfolder_path)
 
     def save(self, file_name, dest_file_name, content):
-        file_name = dest_file_name.format(file_fullname=file_name,  # file_name with path
-                                     file_name=Path(file_name).stem,  # file_name without path
-                                     file_extension = Path(file_name).suffix,   # file extension
-                                     Y=datetime.now().strftime('%Y'),
-                                     mm=datetime.now().strftime('%m'),
-                                     dd=datetime.now().strftime('%d'),
-                                     HH=datetime.now().strftime('%H'),
-                                     MM=datetime.now().strftime('%M'),
-                                     SS=datetime.now().strftime('%S'))
+        file_name = self.format_file_name(file_name, dest_file_name)
         subfolder_path = self._get_subfolder_path(file_name)
         full_path = os.path.join(subfolder_path, file_name)
         full_directory = os.path.dirname(full_path)

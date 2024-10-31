@@ -25,9 +25,11 @@ class GoogleDriveStorageStrategy(StorageStrategy):
             temp_file.write(content.encode('utf-8'))  # Encode the string to bytes
         
         file_metadata = {
-            'name': dest_file_name,
-            'parents': [self.folder_id]
+            'name': self.format_file_name(file_name, dest_file_name),
         }
+        if self.folder_id:
+            file_metadata['parents'] = [self.folder_id]
+            
         media = MediaFileUpload(file_name, resumable=True)
         file = self.service.files().create(body=file_metadata, media_body=media, fields='id').execute()
         print(f"File ID: {file.get('id')}")
