@@ -1,0 +1,7 @@
+strategy: google_drive
+settings:
+## how to enable GDrive API: https://developers.google.com/drive/api/quickstart/python?hl=pl
+
+  service_account_file: /storage/client_secret_269403342997-290pbjjlb06nbof78sjaj7qrqeakp3t0.apps.googleusercontent.com.json
+  folder_id:
+  create_subfolders: true

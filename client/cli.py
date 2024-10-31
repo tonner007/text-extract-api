@@ -3,11 +3,11 @@ import requests
 import time
 import os
 
-def upload_file(file_path, ocr_cache, prompt, prompt_file = None, model = 'llama3.1', strategy = 'marker'):
+def upload_file(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1', strategy='marker', storage_profile='default', storage_filename=None):
     ocr_url = os.getenv('OCR_URL', 'http://localhost:8000/ocr')
     files = {'file': open(file_path, 'rb')}
-    data = {'ocr_cache': ocr_cache, 'model': model, 'strategy': strategy }
-
+    data = {'ocr_cache': ocr_cache, 'model': model, 'strategy': strategy, 'storage_profile': storage_profile, 'storage_filename': storage_filename}
+    print(data)
     try:
         if prompt_file:
             prompt = open(prompt_file, 'r').read()
@@ -95,13 +95,14 @@ def main():
     ocr_parser.add_argument('--model', type=str, default='llama3.1', help='Model to use for the Ollama endpoint')
     ocr_parser.add_argument('--strategy', type=str, default='marker', help='OCR strategy to use for the file')
     ocr_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
+    ocr_parser.add_argument('--storage_profile', type=str, default='default', help='Storage profile to use for the file')
+    ocr_parser.add_argument('--storage_filename', type=str, default=None, help='Storage filename to use for the file')
     #ocr_parser.add_argument('--async_mode', action='store_true', help='Enable async mode for the OCR task')
 
     # Sub-command for getting the result
-    ocr_parser = subparsers.add_parser('result', help='Get the OCR result by specified task id.')
-    ocr_parser.add_argument('--task_id', type=str, help='Task Id returned by the upload command')
-    ocr_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
-
+    result_parser = subparsers.add_parser('result', help='Get the OCR result by specified task id.')
+    result_parser.add_argument('--task_id', type=str, help='Task Id returned by the upload command')
+    result_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
 
     # Sub-command for clearing the cache
     clear_cache_parser = subparsers.add_parser('clear_cache', help='Clear the OCR result cache')
@@ -114,12 +115,11 @@ def main():
     ollama_pull_parser = subparsers.add_parser('llm_pull', help='Pull the latest Llama model from the Ollama API')   
     ollama_pull_parser.add_argument('--model', type=str, default='llama3.1', help='Model to pull from the Ollama API')
 
-
     args = parser.parse_args()
 
     if args.command == 'ocr':
         print(args)
-        result = upload_file(args.file, args.ocr_cache, args.prompt, args.prompt_file, args.model)
+        result = upload_file(args.file, args.ocr_cache, args.prompt, args.prompt_file, args.model, args.strategy, args.storage_profile, args.storage_filename)
         if result is None:
             print("Error uploading file.")
             return

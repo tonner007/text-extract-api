@@ -21,10 +21,12 @@ redis_client = redis.StrictRedis.from_url(redis_url)
 @app.post("/ocr")
 async def ocr_endpoint(
     strategy: str = Form(...),
-    prompt: str = Form(...),
+    prompt: str = Form(None),
     model: str = Form(...),
     file: UploadFile = File(...),
-    ocr_cache: bool = Form(...)
+    ocr_cache: bool = Form(...),
+    storage_profile: str = Form('default'),
+    storage_filename: str = Form(None)
 ):    
     """
     Endpoint to extract text from an uploaded PDF file using different OCR strategies.
@@ -41,10 +43,10 @@ async def ocr_endpoint(
     if strategy not in OCR_STRATEGIES:
         raise HTTPException(status_code=400, detail=f"Unknown strategy '{strategy}'. Available: marker, tesseract")
 
-    print(f"Processing PDF {file.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}")
+    print(f"Processing PDF {file.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}")
 
     # Asynchronous processing using Celery
-    task = ocr_task.apply_async(args=[pdf_bytes, strategy, pdf_hash, ocr_cache, prompt, model])
+    task = ocr_task.apply_async(args=[pdf_bytes, strategy, file.filename, pdf_hash, ocr_cache, prompt, model, storage_profile, storage_filename])
     return {"task_id": task.id}
 
 @app.get("/ocr/result/{task_id}")

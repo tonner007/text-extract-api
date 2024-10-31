@@ -1,6 +1,6 @@
 # pdf-extract-api
 
-Convert any image or PDF to Markdown text or JSON structured document with super-high accuracy, including tabular data, numbers or math formulas.
+Convert any image or PDF to Markdown *text* or JSON structured document with super-high accuracy, including tabular data, numbers or math formulas.
 
 The API is built with FastAPI and uses Celery for asynchronous task processing. Redis is used for caching OCR results.
 
@@ -130,6 +130,17 @@ python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache
 python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
 ```
 
+The `ocr` command can store the results using the `storage_profiles`:
+  - **storage_profile**: Used to save the result - the `default` profile (`/storage_profiles/default.yaml`) is used by default; if empty file is not saved
+  - **storage_filename**: Outputting filename - relative path of the `root_path` set in the storage profile - by default a relative path to `/storage` folder; can use placeholders for dynamic formatting: `{file_name}`, `{file_extension}`, `{Y}`, `{mm}`, `{dd}` - for date formatting, `{HH}`, `{MM}`, `{SS}` - for time formatting
+
+
+### Upload a File for OCR (processing by LLM), store result on disk
+
+```bash
+python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt  --storage_filename "invoices/{Y}/{file_name}-{Y}-{mm}-{dd}.md"
+```
+
 ### Get OCR Result by Task ID
 
 ```bash
@@ -159,6 +170,8 @@ python llm_generate --prompt "Your prompt here"
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result
   - **model**: When provided along with the prompt - this model will be used for LLM processing
+  - **storage_profile**: Used to save the result - the `default` profile (`/storage_profiles/default.yaml`) is used by default; if empty file is not saved
+  - **storage_filename**: Outputting filename - relative path of the `root_path` set in the storage profile - by default a relative path to `/storage` folder; can use placeholders for dynamic formatting: `{file_name}`, `{file_extension}`, `{Y}`, `{mm}`, `{dd}` - for date formatting, `{HH}`, `{MM}`, `{SS}` - for time formatting
 
 Example:
 
@@ -212,6 +225,34 @@ Example:
 ```bash
 curl -X POST "http://localhost:8000/llama_generate" -H "Content-Type: application/json" -d '{"prompt": "Your prompt here", "model":"llama3.1"}'
 ```
+## Storage profiles
+
+The tool can automatically save the results using different storage strategies and storage profiles. Storage profiles are set in the `/storage_profiles` by a yaml configuration files.
+
+Example:
+
+```yaml
+strategy: local_filesystem
+settings:
+  root_path: /storage # The root path where the files will be stored - mount a proper folder in the docker file to match it
+  subfolder_names_format: "" # eg: by_months/{Y}-{mm}/
+  create_subfolders: true
+```
+
+for Google drive:
+
+```yaml
+strategy: google_drive
+settings:
+## how to enable GDrive API: https://developers.google.com/drive/api/quickstart/python?hl=pl
+
+  service_account_file: /storage/client_secret_269403342997-290pbjjlb06nbof78sjaj7qrqeakp3t0.apps.googleusercontent.com.json
+  folder_id:
+  create_subfolders: true
+```
+
+Where the `service_account_file` is a `json` file with authorization credentials. Please read on how to enable Google Drive API and prepare this authorization file [here](https://developers.google.com/drive/api/quickstart/python?hl=pl).
+
 
 ## License
 This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE.md) file for details.
