@@ -6,7 +6,8 @@ from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
 from google.oauth2.service_account import Credentials
 from storage_strategies.storage_strategy import StorageStrategy
 
-
+## Note - this code is using Service Accounts for authentication which are separate accounts other than
+## your Google account. You can create a service account and download the JSON key file to use it for
 ## how to enable GDrive API: https://developers.google.com/drive/api/quickstart/python?hl=pl
 class GoogleDriveStorageStrategy(StorageStrategy):
     def __init__(self, context):
