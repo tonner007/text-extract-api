@@ -16,7 +16,7 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND-redis://redis:6379/0}
       - LLM_PULL_API_URL=${LLM_PULL_API_URL-http://web:8000/llm_pull}
       - LLM_GENEREATE_API_URL=${LLM_GENEREATE_API_URL-http://web:8000/llm_generate}
-      - OLLAMA_HOST${OLLAMA_HOST-http://ollama:11434}
+      - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
       - APP_ENV=${APP_ENV-development}  # Default to development mode
     depends_on:
       - redis
@@ -45,7 +45,7 @@ services:
 
 
   ollama:
-    image: ollama/ollama:latest  # Use the official Ollama image
+    image: ollama/ollama:0.4.0-rc6-rocm  # Use the official Ollama image
     container_name: ollama
     pull_policy: always
     tty: true
@@ -53,7 +53,7 @@ services:
     ports:
       - "11434:11434"  # Expose Ollama's API port, changing internal to external port
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/health"]  # Assumes health endpoint exists
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]  # Assumes health endpoint exists
       interval: 30s
       timeout: 10s
       retries: 3
