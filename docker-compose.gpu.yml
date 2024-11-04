@@ -60,7 +60,7 @@ services:
 
 
   ollama:
-    image: ollama/ollama:latest  # Use the official Ollama image
+    image: ollama/ollama:0.4.0-rc6-rocm # Use the official Ollama image
     container_name: ollama
     pull_policy: always
     tty: true
@@ -68,7 +68,7 @@ services:
     ports:
       - "11434:11434"  # Expose Ollama's API port, changing internal to external port
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/health"]  # Assumes health endpoint exists
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]  # Assumes health endpoint exists
       interval: 30s
       timeout: 10s
       retries: 3
