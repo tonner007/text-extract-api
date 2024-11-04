@@ -216,7 +216,7 @@ python llm_generate --prompt "Your prompt here"
 Example:
 
 ```bash
-curl -X POST "http://localhost:8000/ocr" -F "file=examples/example-mri.pdf" -F "strategy=marker" -F "ocr_cache=true"
+curl -X POST -H "Content-Type: multipart/form-data" -F "data=examples/example-mri.pdf" -F "strategy=marker" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8000/ocr" 
 ```
 
 ### OCR Result Endpoint
