@@ -19,7 +19,7 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND-redis://redis:6379/0}
       - LLM_PULL_API_URL=${LLM_PULL_API_URL-http://web:8000/llm_pull}
       - LLM_GENEREATE_API_URL=${LLM_GENEREATE_API_URL-http://web:8000/llm_generate}
-      - OLLAMA_HOST${OLLAMA_HOST-http://ollama:11434}
+      - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
       - APP_ENV=${APP_ENV-development}  # Default to development mode
     depends_on:
       - redis
