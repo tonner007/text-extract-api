@@ -87,6 +87,8 @@ docker-compose up --build
 docker-compose -f docker-compose.gpu.yml up --build
 ```
 
+**Note:** While on Mac - Docker does not support Apple GPUs. In this case you might want to run the application natively without the Docker Compose
+
 
 This will start the following services:
  - **FastAPI App**: Runs the FastAPI application.
@@ -106,6 +108,14 @@ The project includes a CLI for interacting with the API. To make it work first r
 ```bash
 cd client
 pip install -r requirements.txt
+```
+
+**Note**: While on Mac, you may need to create a virtual Python environment first:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+# now you've got access to `python` and `pip` within your virutal env.
 ```
 
 ### Pull the LLama3.1 model
