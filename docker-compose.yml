@@ -27,7 +27,7 @@ services:
   celery_worker:
     build: ./app
     container_name: celery_worker
-    command: celery -A main.celery worker --loglevel=info
+    command: celery -A main.celery worker --loglevel=info --pool=solo
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}
