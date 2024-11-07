@@ -40,8 +40,45 @@ Before running the example see [getting started](#getting-started)
 
 **Note:** As you may observe in the example above, `marker-pdf` sometimes mismatches the cols and rows which could have potentially great impact on data accuracy. To improve on it there is a feature request [#3](https://github.com/CatchTheTornado/pdf-extract-api/issues/3) for adding alternative support for [`tabled`](https://github.com/VikParuchuri/tabled) model - which is optimized for tables.
 
-
 ## Getting started
+
+You might want to run the app directly on your machine for development purposes OR to use for example Apple GPUs (which are not supported by Docker at the moment).
+
+To have it up and running please execute the following steps:
+
+[Download and install Ollama](https://ollama.com/download)
+[Download and install Docker](https://www.docker.com/products/docker-desktop/)
+
+If you are on Mac or just need to have your dependencies well organized, create a [virtual python env](https://docs.python.org/3/library/venv.html):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+# now you've got access to `python` and `pip` commands
+```
+
+Configure environment variables:
+
+```bash
+cp .env.localhost.example .env.localhost
+```
+
+You might want to just use the defaults - should be fine. After ENV variables are set, just execute:
+
+```bash
+chmod +x run.sh
+run.sh
+```
+
+This command will install all the dependencies - including Redis (via Docker, so it is not entirely docker free method of running `pdf-extract-api` anyways :)
+
+Then you're good to go with running some CLI commands like:
+
+```bash
+
+```
+
+## Getting started with Docker
 
 ### Prerequisites
 
@@ -103,6 +140,16 @@ If the on-prem is too much hassle [ask us about the hosted/cloud edition](mailto
 
 ## CLI tool
 
+**Note**: While on Mac, you may need to create a virtual Python environment first:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+# now you've got access to `python` and `pip` within your virutal env.
+pip install -r app/requirements.txt # install main project requirements
+```
+
+
 The project includes a CLI for interacting with the API. To make it work first run:
 
 ```bash
@@ -110,13 +157,6 @@ cd client
 pip install -r requirements.txt
 ```
 
-**Note**: While on Mac, you may need to create a virtual Python environment first:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-# now you've got access to `python` and `pip` within your virutal env.
-```
 
 ### Pull the LLama3.1 model
 
