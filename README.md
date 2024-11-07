@@ -149,7 +149,7 @@ docker-compose up --build
 docker-compose -f docker-compose.gpu.yml up --build
 ```
 
-**Note:** While on Mac - Docker does not support Apple GPUs. In this case you might want to run the application natively without the Docker Compose
+**Note:** While on Mac - Docker does not support Apple GPUs. In this case you might want to run the application natively without the Docker Compose please check [how to run it natively with GPU support](#getting-started)
 
 
 This will start the following services:
