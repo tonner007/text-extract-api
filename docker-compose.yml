@@ -38,14 +38,14 @@ services:
       - ./app:/app
 
   redis:
-    image: redis:latest
+    image: redis:7.2.4-alpine
     container_name: redis
     ports:
       - "6379:6379"
 
 
   ollama:
-    image: ollama/ollama:0.4.0-rc6-rocm  # Use the official Ollama image
+    image: ollama/ollama # Use the official Ollama image
     container_name: ollama
     pull_policy: always
     tty: true
