@@ -1,5 +1,8 @@
 from celery import Celery
 import os
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 import multiprocessing
 multiprocessing.set_start_method("spawn", force=True)

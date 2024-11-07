@@ -75,7 +75,15 @@ This command will install all the dependencies - including Redis (via Docker, so
 Then you're good to go with running some CLI commands like:
 
 ```bash
+python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
+```
 
+### Scalling the parallell processing
+
+To have multiple tasks runing at once - for concurrent processing please run the following command to start single worker process:
+
+```bash
+celery -A main.celery worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
 ```
 
 ## Getting started with Docker
@@ -96,18 +104,35 @@ cd pdf-extract-api
 
 Create `.env` file in the root directory and set the necessary environment variables. You can use the `.env.example` file as a template:
 
-`cp .env.example .env`
+```bash
+# defaults for docker instances
+cp .env.example .env`
+```
+
+or 
+
+```bash
+# defaults for local run
+cp .env.example.localhost .env
+```
 
 Then modify the variables inside the file:
 
 ```bash
-REDIS_CACHE_URL=redis://redis:6379/1
-OLLAMA_API_URL=http://ollama:11434/api
+#APP_ENV=production # sets the app into prod mode, othervise dev mode with auto-reload on code changes
+REDIS_CACHE_URL=redis://localhost:6379/1
 
 # CLI settings
 OCR_URL=http://localhost:8000/ocr
 RESULT_URL=http://localhost:8000/ocr/result/{task_id}
-CLEAR_CACHE_URL=http://localhost:8000/ocr/clear_cache
+CLEAR_CACHE_URL=http://localhost:8000/ocr/clear_cach
+LLM_PULL_API_URL=http://localhost:8000/llm_pull
+LLM_GENEREATE_API_URL=http://localhost:8000/llm_generate
+
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+OLLAMA_HOST=http://localhost:11434
+APP_ENV=development  # Default to development mode
 ```
 
 ### Build and Run the Docker Containers

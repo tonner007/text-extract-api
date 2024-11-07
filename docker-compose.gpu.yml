@@ -37,7 +37,7 @@ services:
       context: ./app  # Keep the build context as the root directory
       dockerfile: Dockerfile.gpu # Specify the new path to the GPU Dockerfile
     container_name: celery_worker
-    command: celery -A main.celery worker --loglevel=info
+    command: celery -A main.celery worker --loglevel=info --pool=solo
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}
