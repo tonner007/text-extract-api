@@ -4,4 +4,7 @@ app/__pycache__/*
 *.pyc
 .venv
 .DS_Store
+storage/*
+client_secret*.json    
 .env.localhost
+
