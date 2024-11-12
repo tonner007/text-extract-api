@@ -12,7 +12,7 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 - **PDF to JSON** conversion using Ollama supported models (eg. LLama 3.1)
 - **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
 - **Removing PII** This tool can be used for removing Personally Identifiable Information out of PDF - see `examples`
-- **Distributed queue processing** using [Celery][(](https://docs.celeryq.dev/en/stable/getting-started/introduction.html))
+- **Distributed queue processing** using [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html))
 - **Caching** using Redis - the OCR results can be easily cached prior to LLM processing,
 - **Storage Strategies** switchable storage strategies (Google Drive, Local File System ...)
 - **CLI tool** for sending tasks and processing results 
