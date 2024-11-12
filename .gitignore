@@ -6,3 +6,5 @@ app/__pycache__/*
 .DS_Store
 storage/*
 client_secret*.json    
+.env.localhost
+

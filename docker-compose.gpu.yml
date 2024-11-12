@@ -43,7 +43,7 @@ services:
       context: ./app  # Keep the build context as the root directory
       dockerfile: Dockerfile.gpu # Specify the new path to the GPU Dockerfile
     container_name: celery_worker
-    command: celery -A main.celery worker --loglevel=info
+    command: celery -A main.celery worker --loglevel=info --pool=solo
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}
@@ -65,14 +65,14 @@ services:
             - capabilities: [gpu]  # Request GPU support
 
   redis:
-    image: redis:latest
+    image: redis:7.2.4-alpine
     container_name: redis
     ports:
       - "6379:6379"
 
 
   ollama:
-    image: ollama/ollama:0.4.0-rc6-rocm # Use the official Ollama image
+    image: ollama/ollama # Use the official Ollama image
     container_name: ollama
     pull_policy: always
     tty: true

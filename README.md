@@ -40,8 +40,53 @@ Before running the example see [getting started](#getting-started)
 
 **Note:** As you may observe in the example above, `marker-pdf` sometimes mismatches the cols and rows which could have potentially great impact on data accuracy. To improve on it there is a feature request [#3](https://github.com/CatchTheTornado/pdf-extract-api/issues/3) for adding alternative support for [`tabled`](https://github.com/VikParuchuri/tabled) model - which is optimized for tables.
 
-
 ## Getting started
+
+You might want to run the app directly on your machine for development purposes OR to use for example Apple GPUs (which are not supported by Docker at the moment).
+
+To have it up and running please execute the following steps:
+
+[Download and install Ollama](https://ollama.com/download)
+[Download and install Docker](https://www.docker.com/products/docker-desktop/)
+
+If you are on Mac or just need to have your dependencies well organized, create a [virtual python env](https://docs.python.org/3/library/venv.html):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+# now you've got access to `python` and `pip` commands
+```
+
+Configure environment variables:
+
+```bash
+cp .env.localhost.example .env.localhost
+```
+
+You might want to just use the defaults - should be fine. After ENV variables are set, just execute:
+
+```bash
+chmod +x run.sh
+run.sh
+```
+
+This command will install all the dependencies - including Redis (via Docker, so it is not entirely docker free method of running `pdf-extract-api` anyways :)
+
+Then you're good to go with running some CLI commands like:
+
+```bash
+python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
+```
+
+### Scalling the parallell processing
+
+To have multiple tasks runing at once - for concurrent processing please run the following command to start single worker process:
+
+```bash
+celery -A main.celery worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
+```
+
+## Getting started with Docker
 
 ### Prerequisites
 
@@ -59,18 +104,35 @@ cd pdf-extract-api
 
 Create `.env` file in the root directory and set the necessary environment variables. You can use the `.env.example` file as a template:
 
-`cp .env.example .env`
+```bash
+# defaults for docker instances
+cp .env.example .env`
+```
+
+or 
+
+```bash
+# defaults for local run
+cp .env.example.localhost .env
+```
 
 Then modify the variables inside the file:
 
 ```bash
-REDIS_CACHE_URL=redis://redis:6379/1
-OLLAMA_API_URL=http://ollama:11434/api
+#APP_ENV=production # sets the app into prod mode, othervise dev mode with auto-reload on code changes
+REDIS_CACHE_URL=redis://localhost:6379/1
 
 # CLI settings
 OCR_URL=http://localhost:8000/ocr
 RESULT_URL=http://localhost:8000/ocr/result/{task_id}
-CLEAR_CACHE_URL=http://localhost:8000/ocr/clear_cache
+CLEAR_CACHE_URL=http://localhost:8000/ocr/clear_cach
+LLM_PULL_API_URL=http://localhost:8000/llm_pull
+LLM_GENEREATE_API_URL=http://localhost:8000/llm_generate
+
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+OLLAMA_HOST=http://localhost:11434
+APP_ENV=development  # Default to development mode
 ```
 
 ### Build and Run the Docker Containers
@@ -87,6 +149,8 @@ docker-compose up --build
 docker-compose -f docker-compose.gpu.yml up --build
 ```
 
+**Note:** While on Mac - Docker does not support Apple GPUs. In this case you might want to run the application natively without the Docker Compose please check [how to run it natively with GPU support](#getting-started)
+
 
 This will start the following services:
  - **FastAPI App**: Runs the FastAPI application.
@@ -101,12 +165,23 @@ If the on-prem is too much hassle [ask us about the hosted/cloud edition](mailto
 
 ## CLI tool
 
+**Note**: While on Mac, you may need to create a virtual Python environment first:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+# now you've got access to `python` and `pip` within your virutal env.
+pip install -r app/requirements.txt # install main project requirements
+```
+
+
 The project includes a CLI for interacting with the API. To make it work first run:
 
 ```bash
 cd client
 pip install -r requirements.txt
 ```
+
 
 ### Pull the LLama3.1 model
 
@@ -216,7 +291,7 @@ python llm_generate --prompt "Your prompt here"
 Example:
 
 ```bash
-curl -X POST -H "Content-Type: multipart/form-data" -F "data=examples/example-mri.pdf" -F "strategy=marker" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8000/ocr" 
+curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=marker" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8000/ocr" 
 ```
 
 ### OCR Result Endpoint
