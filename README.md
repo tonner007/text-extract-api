@@ -22,7 +22,7 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 Converting MRI report to Markdown + JSON.
 
 ```bash 
-python client/cli.py ocr --file examples/example-mri.pdf --prompt_file examples/example-mri-2-json-prompt.txt
+python client/cli.py ocr_upload --file examples/example-mri.pdf --prompt_file examples/example-mri-2-json-prompt.txt
 ```
 
 Before running the example see [getting started](#getting-started)
@@ -32,7 +32,7 @@ Before running the example see [getting started](#getting-started)
 Converting Invoice to JSON and remove PII
 
 ```bash 
-python client/cli.py ocr --file examples/example-invoice.pdf --prompt_file examples/example-invoice-remove-pii.txt 
+python client/cli.py ocr_upload --file examples/example-invoice.pdf --prompt_file examples/example-invoice-remove-pii.txt 
 ```
 
 Before running the example see [getting started](#getting-started)
@@ -76,7 +76,7 @@ This command will install all the dependencies - including Redis (via Docker, so
 Then you're good to go with running some CLI commands like:
 
 ```bash
-python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
+python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
 ```
 
 ### Scalling the parallell processing
@@ -126,6 +126,7 @@ REDIS_CACHE_URL=redis://localhost:6379/1
 # CLI settings
 OCR_URL=http://localhost:8000/ocr/upload
 OCR_UPLOAD_URL=http://localhost:8000/ocr/upload
+OCR_REQUEST_URL=http://localhost:8000/ocr/request
 RESULT_URL=http://localhost:8000/ocr/result/{task_id}
 CLEAR_CACHE_URL=http://localhost:8000/ocr/clear_cach
 LLM_PULL_API_URL=http://localhost:8000/llm_pull
@@ -197,8 +198,16 @@ python client/cli.py llm_pull --model llama3.1
 ### Upload a File for OCR (converting to Markdown)
 
 ```bash
-python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache
+python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache
 ```
+
+or alternatively
+
+```bash
+python client/cli.py ocr_request --file examples/example-mri.pdf --ocr_cache
+```
+
+The difference is just that the first call uses `ocr/upload` - multipart form data upload, and the second one is a request to `ocr/request` sending the file via base64 encoded JSON property - probable a better suit for smaller files.
 
 
 ### Upload a File for OCR (processing by LLM)
@@ -214,7 +223,7 @@ python client/cli.py llm_pull --model llama3.1
 and only after to run this specific prompt query:
 
 ```bash
-python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
+python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
 ```
 
 The `ocr` command can store the results using the `storage_profiles`:
@@ -225,7 +234,7 @@ The `ocr` command can store the results using the `storage_profiles`:
 ### Upload a File for OCR (processing by LLM), store result on disk
 
 ```bash
-python client/cli.py ocr --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt  --storage_filename "invoices/{Y}/{file_name}-{Y}-{mm}-{dd}.md"
+python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt  --storage_filename "invoices/{Y}/{file_name}-{Y}-{mm}-{dd}.md"
 ```
 
 ### Get OCR Result by Task ID
@@ -293,7 +302,7 @@ python llm_generate --prompt "Your prompt here"
 Example:
 
 ```bash
-curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=marker" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8000/ocr" 
+curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=marker" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8000/ocr/upload" 
 ```
 
 ### OCR Endpoint via JSON request
