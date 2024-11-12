@@ -124,7 +124,8 @@ Then modify the variables inside the file:
 REDIS_CACHE_URL=redis://localhost:6379/1
 
 # CLI settings
-OCR_URL=http://localhost:8000/ocr
+OCR_URL=http://localhost:8000/ocr/upload
+OCR_UPLOAD_URL=http://localhost:8000/ocr/upload
 RESULT_URL=http://localhost:8000/ocr/result/{task_id}
 CLEAR_CACHE_URL=http://localhost:8000/ocr/clear_cach
 LLM_PULL_API_URL=http://localhost:8000/llm_pull
@@ -277,8 +278,8 @@ python llm_generate --prompt "Your prompt here"
 
 ## Endpoints
 
-### OCR Endpoint
-- **URL**: /ocr
+### OCR Endpoint via File Upload / multiform data
+- **URL**: /ocr/upload
 - **Method**: POST
 - **Parameters**:
   - **file**: PDF file to be processed.
@@ -293,6 +294,32 @@ Example:
 
 ```bash
 curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=marker" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8000/ocr" 
+```
+
+### OCR Endpoint via JSON request
+- **URL**: /ocr/request
+- **Method**: POST
+- **Parameters** (JSON body):
+  - **file**: Base64 encoded PDF file content.
+  - **strategy**: OCR strategy to use (`marker` or `tesseract`).
+  - **ocr_cache**: Whether to cache the OCR result (true or false).
+  - **prompt**: When provided, will be used for Ollama processing the OCR result.
+  - **model**: When provided along with the prompt - this model will be used for LLM processing.
+  - **storage_profile**: Used to save the result - the `default` profile (`/storage_profiles/default.yaml`) is used by default; if empty file is not saved.
+  - **storage_filename**: Outputting filename - relative path of the `root_path` set in the storage profile - by default a relative path to `/storage` folder; can use placeholders for dynamic formatting: `{file_name}`, `{file_extension}`, `{Y}`, `{mm}`, `{dd}` - for date formatting, `{HH}`, `{MM}`, `{SS}` - for time formatting.
+
+Example:
+
+```bash
+curl -X POST "http://localhost:8000/ocr/request" -H "Content-Type: application/json" -d '{
+  "file": "<base64-encoded-file-content>",
+  "strategy": "marker",
+  "ocr_cache": true,
+  "prompt": "",
+  "model": "llama3.1",
+  "storage_profile": "default",
+  "storage_filename": "example.pdf"
+}'
 ```
 
 ### OCR Result Endpoint
@@ -326,7 +353,7 @@ curl -X POST "http://localhost:8000/ocr/clear_cache"
 Example:
 
 ```bash
-curl -X POST "http://localhost:8000/llama_pull" -H "Content-Type: application/json" -d '{"model": "llama3.1"}'
+curl -X POST "http://localhost:8000/llm/pull" -H "Content-Type: application/json" -d '{"model": "llama3.1"}'
 ```
 
 ### Ollama Endpoint
@@ -339,7 +366,7 @@ curl -X POST "http://localhost:8000/llama_pull" -H "Content-Type: application/js
 Example:
 
 ```bash
-curl -X POST "http://localhost:8000/llama_generate" -H "Content-Type: application/json" -d '{"prompt": "Your prompt here", "model":"llama3.1"}'
+curl -X POST "http://localhost:8000/llm/generate" -H "Content-Type: application/json" -d '{"prompt": "Your prompt here", "model":"llama3.1"}'
 ```
 
 ### List storage files:
