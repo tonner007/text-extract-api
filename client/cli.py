@@ -1,13 +1,17 @@
 import argparse
+import base64
 import requests
 import time
 import os
 
-def upload_file(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1', strategy='marker', storage_profile='default', storage_filename=None):
-    ocr_url = os.getenv('OCR_URL', 'http://localhost:8000/ocr')
+def ocr_upload(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1', strategy='marker', storage_profile='default', storage_filename=None):
+    ocr_url = os.getenv('OCR_UPLOAD_URL', 'http://localhost:8000/ocr/upload')
     files = {'file': open(file_path, 'rb')}
-    data = {'ocr_cache': ocr_cache, 'model': model, 'strategy': strategy, 'storage_profile': storage_profile, 'storage_filename': storage_filename}
-    print(data)
+    data = {'ocr_cache': ocr_cache, 'model': model, 'strategy': strategy, 'storage_profile': storage_profile}
+
+    if storage_filename:
+        data['storage_filename'] = storage_filename
+    
     try:
         if prompt_file:
             prompt = open(prompt_file, 'r').read()
@@ -31,6 +35,47 @@ def upload_file(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1'
             }
     else:
         print(f"Failed to upload file: {response.text}")
+        return None
+
+def ocr_request(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1', strategy='marker', storage_profile='default', storage_filename=None):
+    ocr_url = os.getenv('OCR_REQUEST_URL', 'http://localhost:8000/ocr/request')
+    with open(file_path, 'rb') as f:
+        file_content = base64.b64encode(f.read()).decode('utf-8')
+    
+    data = {
+        'ocr_cache': ocr_cache,
+        'model': model,
+        'strategy': strategy,
+        'storage_profile': storage_profile,
+        'file': file_content
+    }
+
+    if storage_filename:
+        data['storage_filename'] = storage_filename
+    
+    if prompt_file:
+        try:
+            prompt = open(prompt_file, 'r').read()
+        except FileNotFoundError:
+            print(f"Prompt file not found: {prompt_file}")
+            return None
+    
+    if prompt:
+        data['prompt'] = prompt
+    
+    response = requests.post(ocr_url, json=data)
+    if response.status_code == 200:
+        respObject = response.json()
+        if respObject.get('task_id'):
+            return {
+                "task_id": respObject.get('task_id')
+            }
+        else:
+            return {
+                "text": respObject.get('text') # sync mode support
+            }
+    else:
+        print(f"Error: {response.status_code} - {response.text}")
         return None
 
 def get_result(task_id, print_progress = False):
@@ -113,7 +158,20 @@ def main():
     parser = argparse.ArgumentParser(description="CLI for OCR and Ollama operations.")
     subparsers = parser.add_subparsers(dest='command', help='Sub-command help')
 
-    # Sub-command for uploading a file
+    # Sub-command for uploading a file via file upload
+    ocr_parser = subparsers.add_parser('ocr_upload', help='Upload a file to the OCR endpoint and get the result.')
+    ocr_parser.add_argument('--file', type=str, default='examples/rmi-example.pdf', help='Path to the file to upload')
+    ocr_parser.add_argument('--ocr_cache', default=True, action='store_true', help='Enable OCR result caching')
+    ocr_parser.add_argument('--prompt', type=str, default=None, help='Prompt used for the Ollama model to fix or transform the file')
+    ocr_parser.add_argument('--prompt_file', default=None, type=str, help='Prompt file name used for the Ollama model to fix or transform the file')
+    ocr_parser.add_argument('--model', type=str, default='llama3.1', help='Model to use for the Ollama endpoint')
+    ocr_parser.add_argument('--strategy', type=str, default='marker', help='OCR strategy to use for the file')
+    ocr_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
+    ocr_parser.add_argument('--storage_profile', type=str, default='default', help='Storage profile to use for the file')
+    ocr_parser.add_argument('--storage_filename', type=str, default=None, help='Storage filename to use for the file. You may use some formatting - see the docs')
+    #ocr_parser.add_argument('--async_mode', action='store_true', help='Enable async mode for the OCR task')
+
+    # Sub-command for uploading a file via file upload - @deprecated - it's a backward compatibility gimmick
     ocr_parser = subparsers.add_parser('ocr', help='Upload a file to the OCR endpoint and get the result.')
     ocr_parser.add_argument('--file', type=str, default='examples/rmi-example.pdf', help='Path to the file to upload')
     ocr_parser.add_argument('--ocr_cache', default=True, action='store_true', help='Enable OCR result caching')
@@ -123,8 +181,21 @@ def main():
     ocr_parser.add_argument('--strategy', type=str, default='marker', help='OCR strategy to use for the file')
     ocr_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
     ocr_parser.add_argument('--storage_profile', type=str, default='default', help='Storage profile to use for the file')
-    ocr_parser.add_argument('--storage_filename', type=str, default=None, help='Storage filename to use for the file')
+    ocr_parser.add_argument('--storage_filename', type=str, default=None, help='Storage filename to use for the file. You may use some formatting - see the docs')
     #ocr_parser.add_argument('--async_mode', action='store_true', help='Enable async mode for the OCR task')
+
+
+    # Sub-command for uploading a file via request JSON
+    ocr_request_parser = subparsers.add_parser('ocr_request', help='Upload a file to the OCR endpoint via JSON and get the result.')
+    ocr_request_parser.add_argument('--file', type=str, default='examples/rmi-example.pdf', help='Path to the file to upload')
+    ocr_request_parser.add_argument('--ocr_cache', default=True, action='store_true', help='Enable OCR result caching')
+    ocr_request_parser.add_argument('--prompt', type=str, default=None, help='Prompt used for the Ollama model to fix or transform the file')
+    ocr_request_parser.add_argument('--prompt_file', default=None, type=str, help='Prompt file name used for the Ollama model to fix or transform the file')
+    ocr_request_parser.add_argument('--model', type=str, default='llama3.1', help='Model to use for the Ollama endpoint')
+    ocr_request_parser.add_argument('--strategy', type=str, default='marker', help='OCR strategy to use')
+    ocr_request_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
+    ocr_request_parser.add_argument('--storage_profile', type=str, default='default', help='Storage profile to use. You may use some formatting - see the docs')
+    ocr_request_parser.add_argument('--storage_filename', type=str, default=None, help='Storage filename to use')
 
     # Sub-command for getting the result
     result_parser = subparsers.add_parser('result', help='Get the OCR result by specified task id.')
@@ -158,9 +229,21 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command == 'ocr':
+    if args.command == 'ocr' or args.command == 'ocr_upload':
         print(args)
-        result = upload_file(args.file, args.ocr_cache, args.prompt, args.prompt_file, args.model, args.strategy, args.storage_profile, args.storage_filename)
+        result = ocr_upload(args.file, args.ocr_cache, args.prompt, args.prompt_file, args.model, args.strategy, args.storage_profile, args.storage_filename)
+        if result is None:
+            print("Error uploading file.")
+            return
+        if result.get('text'):
+            print(result.get('text'))
+        elif result:
+            print("File uploaded successfully. Task Id: " + result.get('task_id') +  " Waiting for the result...")
+            text_result = get_result(result.get('task_id'), args.print_progress)
+            if text_result:
+                print(text_result)
+    elif args.command == 'ocr_request':
+        result = ocr_request(args.file, args.ocr_cache, args.prompt, args.prompt_file, args.model, args.strategy, args.storage_profile, args.storage_filename)
         if result is None:
             print("Error uploading file.")
             return
