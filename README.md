@@ -122,6 +122,7 @@ Then modify the variables inside the file:
 ```bash
 #APP_ENV=production # sets the app into prod mode, othervise dev mode with auto-reload on code changes
 REDIS_CACHE_URL=redis://localhost:6379/1
+STORAGE_PROFILE_PATH=/storage_profiles
 
 # CLI settings
 OCR_URL=http://localhost:8000/ocr/upload
@@ -137,6 +138,9 @@ CELERY_RESULT_BACKEND=redis://localhost:6379/0
 OLLAMA_HOST=http://localhost:11434
 APP_ENV=development  # Default to development mode
 ```
+
+
+**Note:** In order to properly save the output files you might need to modify `storage_profiles/default.yaml` to change the default storage path according to the volumes path defined in the `docker-compose.yml`
 
 ### Build and Run the Docker Containers
 

@@ -12,9 +12,11 @@ import os
 from pydantic import BaseModel, Field, field_validator
 import ollama
 import base64
+from typing import Optional
+
 
 def storage_profile_exists(profile_name: str) -> bool:
-    profile_path = os.path.join('storage_profiles', f'{profile_name}.yaml')
+    profile_path = os.path.abspath(os.path.join(os.getenv('STORAGE_PROFILE_PATH', '/storage_profiles'), f'{profile_name}.yaml'))
     return os.path.isfile(profile_path)
 
 app = FastAPI()
@@ -38,7 +40,10 @@ async def ocr_endpoint(
     Supports both synchronous and asynchronous processing.
     """
     # Validate input
-    OcrFormRequest(strategy=strategy, prompt=prompt, model=model, ocr_cache=ocr_cache, storage_profile=storage_profile, storage_filename=storage_filename)
+    try:
+        OcrFormRequest(strategy=strategy, prompt=prompt, model=model, ocr_cache=ocr_cache, storage_profile=storage_profile, storage_filename=storage_filename)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     if file.content_type is not None and file.content_type != 'application/pdf':
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDFs are supported.")
@@ -79,13 +84,13 @@ class OllamaPullRequest(BaseModel):
     model: str
 
 class OcrRequest(BaseModel):
-    strategy: str
-    prompt: str = None
-    model: str
-    file: str  # Base64 encoded file content
-    ocr_cache: bool
-    storage_profile: str = 'default'
-    storage_filename: str = None
+    strategy: str = Field(..., description="OCR strategy to use")
+    prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
+    model: str = Field(..., description="Model to use for the Ollama endpoint")
+    file: str = Field(..., description="Base64 encoded PDF file")
+    ocr_cache: bool = Field(..., description="Enable OCR result caching")
+    storage_profile: Optional[str] = Field('default', description="Storage profile to use")
+    storage_filename: Optional[str] = Field(None, description="Storage filename to use")
 
     @field_validator('strategy')
     def validate_strategy(cls, v):
@@ -111,11 +116,11 @@ class OcrRequest(BaseModel):
 
 class OcrFormRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
-    prompt: str = Field(None, description="Prompt for the Ollama model")
+    prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
     model: str = Field(..., description="Model to use for the Ollama endpoint")
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
-    storage_profile: str = Field('default', description="Storage profile to use")
-    storage_filename: str = Field(None, description="Storage filename to use")
+    storage_profile: Optional[str] = Field('default', description="Storage profile to use")
+    storage_filename: Optional[str] = Field(None, description="Storage filename to use")
 
     @field_validator('strategy')
     def validate_strategy(cls, v):
@@ -136,8 +141,12 @@ async def ocr_request_endpoint(request: OcrRequest):
     Supports both synchronous and asynchronous processing.
     """
     # Validate input
-    request_data = request.dict()
-    OcrRequest(**request_data)
+    request_data = request.model_dump()
+    try:
+        print(request_data)
+        OcrRequest(**request_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     file_content = base64.b64decode(request.file)
 
