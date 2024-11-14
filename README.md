@@ -87,6 +87,28 @@ To have multiple tasks runing at once - for concurrent processing please run the
 celery -A main.celery worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
 ```
 
+## Free demo
+
+To try out the application with our hosted version you can skip the Getting started and try out the CLI tool against our cloud:
+
+In the terminal:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r app/requirements.txt
+export OCR_UPLOAD_URL=https://doctractor:Aekie2ao@api.doctractor.com/ocr/upload
+export RESULT_URL=https://doctractor:Aekie2ao@api.doctractor.com/ocr/result/
+
+python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
+```
+
+
+**Note:** In the free demo we don't guarantee any processing times. The API is Open so please do **not send any secret documents neither any documents containing personal information**, If you do - you're doing it on your own risk and responsiblity.
+
+
+
+
 ## Getting started with Docker
 
 ### Prerequisites
@@ -128,7 +150,7 @@ STORAGE_PROFILE_PATH=/storage_profiles
 OCR_URL=http://localhost:8000/ocr/upload
 OCR_UPLOAD_URL=http://localhost:8000/ocr/upload
 OCR_REQUEST_URL=http://localhost:8000/ocr/request
-RESULT_URL=http://localhost:8000/ocr/result/{task_id}
+RESULT_URL=http://localhost:8000/ocr/result/
 CLEAR_CACHE_URL=http://localhost:8000/ocr/clear_cach
 LLM_PULL_API_URL=http://localhost:8000/llm_pull
 LLM_GENEREATE_API_URL=http://localhost:8000/llm_generate
@@ -165,8 +187,7 @@ This will start the following services:
  - **Redis**: Caches OCR results.
  - **Ollama**: Runs the Ollama model.
 
-
-## Hosted edition
+## Cloud - paid edition
 
 If the on-prem is too much hassle [ask us about the hosted/cloud edition](mailto:info@catchthetornado.com?subject=pdf-extract-api%20but%20hosted) of pdf-extract-api, we can setup it you, billed just for the usage.
 
