@@ -107,7 +107,7 @@ Create `.env` file in the root directory and set the necessary environment varia
 
 ```bash
 # defaults for docker instances
-cp .env.example .env`
+cp .env.example .env
 ```
 
 or 
