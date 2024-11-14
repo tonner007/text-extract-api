@@ -80,9 +80,9 @@ def ocr_request(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1'
 
 def get_result(task_id, print_progress = False):
     extracted_text_printed_once = False
-    result_url = os.getenv('RESULT_URL', f'http://localhost:8000/ocr/result/{task_id}')
+    result_url = os.getenv('RESULT_URL', f'http://localhost:8000/ocr/result/')
     while True:
-        response = requests.get(result_url)
+        response = requests.get(result_url + task_id)
         result = response.json()
         if result['state'] != 'SUCCESS' and print_progress:
             task_info = result.get('info')
