@@ -87,7 +87,7 @@ To have multiple tasks runing at once - for concurrent processing please run the
 celery -A main.celery worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
 ```
 
-## Free online demo
+## Online demo
 
 To try out the application with our hosted version you can skip the Getting started and try out the CLI tool against our cloud:
 
@@ -104,6 +104,8 @@ export RESULT_URL=https://doctractor:Aekie2ao@api.doctractor.com/ocr/result/
 
 python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
 ```
+
+[Demo Source code](https://github.com/CatchTheTornado/pdf-extract-api-demo)
 
 **Note:** In the free demo we don't guarantee any processing times. The API is Open so please do **not send any secret documents neither any documents containing personal information**, If you do - you're doing it on your own risk and responsiblity.
 
