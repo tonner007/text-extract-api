@@ -312,6 +312,35 @@ python client/cli.py clear_cache
 python llm_generate --prompt "Your prompt here"
 ```
 
+## API Clients
+
+You might want to use the decdicated API clients to use `pdf-extract-api`
+
+### Typescript
+
+There's a dedicated API client for Typescript - [pdf-extract-api-client](https://github.com/CatchTheTornado/pdf-extract-api-client) and the `npm` package by the same name:
+
+```bash
+npm install pdf-extract-api-client
+```
+
+Usage:
+
+```js
+import { ApiClient, OcrRequest } from 'pdf-extract-api-client';
+const apiClient = new ApiClient('https://api.doctractor.com/', 'doctractor', 'Aekie2ao');
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+formData.append('prompt', 'Convert file to JSON and return only JSON'); // if not provided, no LLM transformation will gonna happen - just the OCR
+formData.append('strategy', 'marker');
+formData.append('model', 'llama3.1')
+formData.append('ocr_cache', 'true');
+
+apiClient.uploadFile(formData).then(response => {
+    console.log(response);
+});
+```
+
 ## Endpoints
 
 ### OCR Endpoint via File Upload / multiform data
