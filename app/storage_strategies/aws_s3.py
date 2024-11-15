@@ -4,15 +4,6 @@ from string import Template
 from botocore.exceptions import NoCredentialsError, ClientError
 from storage_strategies.storage_strategy import StorageStrategy
 
-# Requirements for AWS S3 Access Key:
-# 1. The access key must belong to an IAM user or role with permissions for S3 operations.
-# 2. The IAM policy attached must explicitly allow actions such as:
-#    - s3:PutObject (for uploading files)
-#    - s3:GetObject (for downloading files)
-#    - s3:ListBucket (for listing files in the bucket)
-#    - s3:DeleteObject (for deleting files)
-# 3. The IAM policy must specify the appropriate resource ARN for the bucket and objects, e.g.:
-#    - "arn:aws:s3:::your-bucket-name/*" (for all objects in the bucket)
 class AWSS3StorageStrategy(StorageStrategy):
     def __init__(self, context):
         super().__init__(context)
