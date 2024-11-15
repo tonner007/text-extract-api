@@ -13,8 +13,6 @@ class AWSS3StorageStrategy(StorageStrategy):
         self.access_key = self._resolve_placeholder(context['settings'].get('access_key'))
         self.secret_access_key = self._resolve_placeholder(context['settings'].get('secret_access_key'))
 
-        print(f"Region: {self.region}")
-
         self.s3_client = boto3.client(
             's3',
             aws_access_key_id=self.access_key,
