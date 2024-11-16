@@ -26,13 +26,15 @@ class AWSS3StorageStrategy(StorageStrategy):
         return Template(value).substitute(os.environ)
 
     def save(self, file_name, dest_file_name, content):
+        formatted_file_name = self.format_file_name(file_name, dest_file_name)
+
         try:
             self.s3_client.put_object(
                 Bucket=self.bucket_name,
-                Key=dest_file_name,
+                Key=formatted_file_name,
                 Body=content.encode('utf-8')
             )
-            print(f"File {dest_file_name} saved to S3 bucket {self.bucket_name}.")
+            print(f"File {formatted_file_name} saved to S3 bucket {self.bucket_name}.")
         except NoCredentialsError:
             print("AWS credentials are missing or invalid.")
         except ClientError as e:

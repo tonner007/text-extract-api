@@ -528,7 +528,7 @@ settings:
    }
    ```
 
-And fill the `.env` file with the proper AWS credentials:
+Next, populate the appropriate `.env` file (e.g., .env, .env.localhost) with the required AWS credentials:
 
 ```bash
 AWS_ACCESS_KEY_ID=your-access-key-id
@@ -538,7 +538,7 @@ AWS_S3_BUCKET_NAME=your-bucket-name
 ```
 
 ## License
-This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE.md) file for details.
+This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE) file for details.
 
 **Important note on [marker](https://github.com/VikParuchuri/marker) license***:
 
