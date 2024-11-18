@@ -28,6 +28,8 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_filename, pdf_hash, ocr_cache, 
         raise ValueError(f"Unknown strategy '{strategy_name}'. Available: marker, tesseract, llama_vision")
 
     ocr_strategy = OCR_STRATEGIES[strategy_name]
+    ocr_strategy.set_update_state_callback(self.update_state)
+
     self.update_state(state='PROGRESS', status="File uploaded successfully", meta={'progress': 10})  # Example progress update
     
     extracted_text = None
