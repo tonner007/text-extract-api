@@ -33,11 +33,11 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_filename, pdf_hash, ocr_cache, 
     self.update_state(state='PROGRESS', status="File uploaded successfully", meta={'progress': 10})  # Example progress update
     
     extracted_text = None
-    # if ocr_cache:
-    #     cached_result = redis_client.get(pdf_hash)
-    #     if cached_result:
-    #         # Return cached result if available
-    #         extracted_text = cached_result.decode('utf-8')
+    if ocr_cache:
+        cached_result = redis_client.get(pdf_hash)
+        if cached_result:
+            # Return cached result if available
+            extracted_text = cached_result.decode('utf-8')
 
     if extracted_text is None:
         print("Extracting text from PDF...")
