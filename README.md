@@ -464,7 +464,7 @@ curl -X POST "http://localhost:8000/llm/generate" -H "Content-Type: application/
 
 The tool can automatically save the results using different storage strategies and storage profiles. Storage profiles are set in the `/storage_profiles` by a yaml configuration files.
 
-Example:
+### Local File System
 
 ```yaml
 strategy: local_filesystem
@@ -474,7 +474,7 @@ settings:
   create_subfolders: true
 ```
 
-for Google drive:
+### Google Drive
 
 ```yaml
 strategy: google_drive
@@ -489,8 +489,56 @@ Where the `service_account_file` is a `json` file with authorization credentials
 
 Note: Service Account is different account that the one you're using for Google workspace (files will not be visible in the UI)
 
+### Amazon S3 - Cloud Object Storage
+
+```yaml
+strategy: aws_s3
+settings:
+  bucket_name: ${AWS_S3_BUCKET_NAME}
+  region: ${AWS_REGION}
+  access_key: ${AWS_ACCESS_KEY_ID}
+  secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+```
+
+#### Requirements for AWS S3 Access Key
+
+1. **Access Key Ownership**  
+   The access key must belong to an IAM user or role with permissions for S3 operations.
+
+2. **IAM Policy Example**  
+   The IAM policy attached to the user or role must allow the necessary actions. Below is an example of a policy granting access to an S3 bucket:
+   ```json
+   {
+       "Version": "2012-10-17",
+       "Statement": [
+           {
+               "Effect": "Allow",
+               "Action": [
+                   "s3:PutObject",
+                   "s3:GetObject",
+                   "s3:ListBucket",
+                   "s3:DeleteObject"
+               ],
+               "Resource": [
+                   "arn:aws:s3:::your-bucket-name",
+                   "arn:aws:s3:::your-bucket-name/*"
+               ]
+           }
+       ]
+   }
+   ```
+
+Next, populate the appropriate `.env` file (e.g., .env, .env.localhost) with the required AWS credentials:
+
+```bash
+AWS_ACCESS_KEY_ID=your-access-key-id
+AWS_SECRET_ACCESS_KEY=your-secret-access-key
+AWS_REGION=your-region
+AWS_S3_BUCKET_NAME=your-bucket-name
+```
+
 ## License
-This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE.md) file for details.
+This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE) file for details.
 
 **Important note on [marker](https://github.com/VikParuchuri/marker) license***:
 
