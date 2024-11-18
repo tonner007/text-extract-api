@@ -8,7 +8,7 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 
 ## Features:
 - **No Cloud/external dependencies** all you need: PyTorch based OCR (Marker) + Ollama are shipped and configured via `docker-compose` no data is sent outside your dev/server environment,
-- **PDF to Markdown** conversion with very high accuracy using different OCR strategies including [marker](https://github.com/VikParuchuri/marker), [surya-ocr](https://github.com/VikParuchuri/surya) or [tessereact](https://github.com/h/pytesseract)
+- **PDF to Markdown** conversion with very high accuracy using different OCR strategies including [marker](https://github.com/VikParuchuri/marker) and [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [surya-ocr](https://github.com/VikParuchuri/surya) or [tessereact](https://github.com/h/pytesseract)
 - **PDF to JSON** conversion using Ollama supported models (eg. LLama 3.1)
 - **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
 - **Removing PII** This tool can be used for removing Personally Identifiable Information out of PDF - see `examples`
@@ -149,6 +149,7 @@ Then modify the variables inside the file:
 #APP_ENV=production # sets the app into prod mode, othervise dev mode with auto-reload on code changes
 REDIS_CACHE_URL=redis://localhost:6379/1
 STORAGE_PROFILE_PATH=/storage_profiles
+LLAMA_VISION_PROMPT="You are OCR. Convert image to markdown."
 
 # CLI settings
 OCR_URL=http://localhost:8000/ocr/upload
@@ -215,13 +216,16 @@ pip install -r requirements.txt
 ```
 
 
-### Pull the LLama3.1 model
+### Pull the LLama3.1 and LLama3.2-vision models
 
 You might want to test out [different models supported by LLama](https://ollama.com/library)
 
 ```bash
 python client/cli.py llm_pull --model llama3.1
+python client/cli.py llm_pull --model llama3.2-vision
 ```
+
+These models are required for most features supported by `pdf-extract-api`.
 
 
 ### Upload a File for OCR (converting to Markdown)
@@ -247,6 +251,7 @@ For example you must run:
 
 ```bash
 python client/cli.py llm_pull --model llama3.1
+python client/cli.py llm_pull --model llama3.2-vision
 ```
 
 and only after to run this specific prompt query:
@@ -334,7 +339,7 @@ const apiClient = new ApiClient('https://api.doctractor.com/', 'doctractor', 'Ae
 const formData = new FormData();
 formData.append('file', fileInput.files[0]);
 formData.append('prompt', 'Convert file to JSON and return only JSON'); // if not provided, no LLM transformation will gonna happen - just the OCR
-formData.append('strategy', 'marker');
+formData.append('strategy', 'llama_vision');
 formData.append('model', 'llama3.1')
 formData.append('ocr_cache', 'true');
 
@@ -350,7 +355,7 @@ apiClient.uploadFile(formData).then(response => {
 - **Method**: POST
 - **Parameters**:
   - **file**: PDF file to be processed.
-  - **strategy**: OCR strategy to use (`marker` or `tesseract`).
+  - **strategy**: OCR strategy to use (`marker`, `llama_vision` or `tesseract`).
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result
   - **model**: When provided along with the prompt - this model will be used for LLM processing
@@ -368,7 +373,7 @@ curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-m
 - **Method**: POST
 - **Parameters** (JSON body):
   - **file**: Base64 encoded PDF file content.
-  - **strategy**: OCR strategy to use (`marker` or `tesseract`).
+  - **strategy**: OCR strategy to use (`marker`, `llama_vision` or `tesseract`).
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result.
   - **model**: When provided along with the prompt - this model will be used for LLM processing.

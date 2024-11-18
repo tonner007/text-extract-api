@@ -2,6 +2,7 @@ import time
 from celery_config import celery
 from ocr_strategies.marker import MarkerOCRStrategy
 from ocr_strategies.tesseract import TesseractOCRStrategy
+from ocr_strategies.llama_vision import LlamaVisionOCRStrategy
 import redis
 import os
 import ollama
@@ -9,7 +10,8 @@ from storage_manager import StorageManager
 
 OCR_STRATEGIES = {
     'marker': MarkerOCRStrategy(),
-    'tesseract': TesseractOCRStrategy()
+    'tesseract': TesseractOCRStrategy(),
+    'llama_vision': LlamaVisionOCRStrategy()
 }
 
 # Connect to Redis
@@ -23,17 +25,19 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_filename, pdf_hash, ocr_cache, 
     """
     start_time = time.time()
     if strategy_name not in OCR_STRATEGIES:
-        raise ValueError(f"Unknown strategy '{strategy_name}'. Available: marker, tesseract")
+        raise ValueError(f"Unknown strategy '{strategy_name}'. Available: marker, tesseract, llama_vision")
 
     ocr_strategy = OCR_STRATEGIES[strategy_name]
+    ocr_strategy.set_update_state_callback(self.update_state)
+
     self.update_state(state='PROGRESS', status="File uploaded successfully", meta={'progress': 10})  # Example progress update
     
     extracted_text = None
-    if ocr_cache:
-        cached_result = redis_client.get(pdf_hash)
-        if cached_result:
-            # Return cached result if available
-            extracted_text = cached_result.decode('utf-8')
+    # if ocr_cache:
+    #     cached_result = redis_client.get(pdf_hash)
+    #     if cached_result:
+    #         # Return cached result if available
+    #         extracted_text = cached_result.decode('utf-8')
 
     if extracted_text is None:
         print("Extracting text from PDF...")

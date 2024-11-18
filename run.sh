@@ -12,6 +12,9 @@ ollama serve &
 echo "Pulling LLama3.1 model"
 ollama pull llama3.1
 
+echo "Pulling LLama3.2-vision model"
+ollama pull llama3.2-vision
+
 echo "Starting Redis"
 docker run  -p 6379:6379 --restart always --detach redis &
 
