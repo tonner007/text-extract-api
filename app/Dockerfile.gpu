@@ -46,6 +46,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
     libgl1-mesa-glx \
     tesseract-ocr \
     libtesseract-dev \
+    poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container
