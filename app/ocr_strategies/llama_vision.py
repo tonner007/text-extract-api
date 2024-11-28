@@ -1,4 +1,5 @@
 import base64
+import tempfile
 from ocr_strategies.ocr_strategy import OCRStrategy
 import ollama
 import io
@@ -20,14 +21,21 @@ class LlamaVisionOCRStrategy(OCRStrategy):
             # Convert image to base64
             buffered = io.BytesIO()
             image.save(buffered, format="JPEG")
-            img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            #img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            # Save image to a temporary file and get its path
+            temp_filename = None
+            with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as temp_file:
+                image.save(temp_file, format="JPEG")
+                temp_filename = temp_file.name
 
             # Generate text using the Llama 3.2 Vision model
             try:
                 response = ollama.chat("llama3.2-vision", [{
+                    'role': 'user',
                     'content':  os.getenv('LLAMA_VISION_PROMPT', "You are OCR. Convert image to markdown."),
-                    'images': [img_str]
+                    'images': [temp_filename]
                 }], stream=True)
+                os.remove(temp_filename)
                 num_chunk = 1
                 for chunk in response:
                     self.update_state_callback(state='PROGRESS', meta={'progress': str(30 + ocr_percent_done), 'status': 'OCR Processing (page ' + str(i+1) + ' of ' + str(num_pages) +') chunk no: ' + str(num_chunk), 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
