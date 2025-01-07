@@ -43,7 +43,7 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_filename, pdf_hash, ocr_cache, 
         print("Extracting text from PDF...")
         elapsed_time = time.time() - start_time
         self.update_state(state='PROGRESS', meta={'progress': 30, 'status': 'Extracting text from PDF', 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
-        extracted_text = ocr_strategy.extract_text_from_png(pdf_bytes)
+        extracted_text = ocr_strategy.extract_text_from_pdf(pdf_bytes)
     else:
         print("Using cached result...")
 
