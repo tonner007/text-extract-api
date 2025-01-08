@@ -36,7 +36,7 @@ async def ocr_endpoint(
     storage_filename: str = Form(None)
 ):
     """
-    Endpoint to extract text from an uploaded PDF file using different OCR strategies.
+    Endpoint to extract text from an uploaded PDF, Image or Office file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
     """
     # Validate input
@@ -50,10 +50,10 @@ async def ocr_endpoint(
 
     pdf_bytes = await file.read()
 
-    # Generate a hash of the PDF content for caching
+    # Generate a hash of the document content for caching
     pdf_hash = md5(pdf_bytes).hexdigest()
 
-    print(f"Processing PDF {file.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}")
+    print(f"Processing Document {file.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}")
 
     # Asynchronous processing using Celery
     task = ocr_task.apply_async(args=[pdf_bytes, strategy, file.filename, pdf_hash, ocr_cache, prompt, model, storage_profile, storage_filename])
@@ -71,7 +71,7 @@ async def ocr_upload_endpoint(
     storage_filename: str = Form(None)
 ):
     """
-    Alias endpoint to extract text from an uploaded PDF file using different OCR strategies.
+    Alias endpoint to extract text from an uploaded PDF/Office/Image file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
     """
     return await ocr_endpoint(strategy, prompt, model, file, ocr_cache, storage_profile, storage_filename)
@@ -87,7 +87,7 @@ class OcrRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
     prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
     model: str = Field(..., description="Model to use for the Ollama endpoint")
-    file: str = Field(..., description="Base64 encoded PDF file")
+    file: str = Field(..., description="Base64 encoded document file")
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
     storage_filename: Optional[str] = Field(None, description="Storage filename to use")
@@ -137,7 +137,7 @@ class OcrFormRequest(BaseModel):
 @app.post("/ocr/request")
 async def ocr_request_endpoint(request: OcrRequest):
     """
-    Endpoint to extract text from an uploaded PDF file using different OCR strategies.
+    Endpoint to extract text from an uploaded PDF/Office/Image file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
     """
     # Validate input

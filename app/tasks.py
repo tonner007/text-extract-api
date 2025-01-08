@@ -21,7 +21,7 @@ redis_client = redis.StrictRedis.from_url(redis_url)
 @celery.task(bind=True)
 def ocr_task(self, pdf_bytes, strategy_name, pdf_filename, pdf_hash, ocr_cache, prompt, model, storage_profile, storage_filename=None):
     """
-    Celery task to perform OCR processing on a PDF file.
+    Celery task to perform OCR processing on a PDF/Office/image file.
     """
     start_time = time.time()
     if strategy_name not in OCR_STRATEGIES:
