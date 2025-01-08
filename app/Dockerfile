@@ -11,10 +11,11 @@ RUN echo 'Acquire::http::Pipeline-Depth 0;\nAcquire::http::No-Cache true;\nAcqui
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
     && apt-get update --fix-missing \
     && apt-get install -y \
-    libgl1-mesa-glx \
-    tesseract-ocr \
-    libtesseract-dev \
-    poppler-utils \
+        libgl1-mesa-glx \
+        tesseract-ocr \
+        libtesseract-dev \
+        poppler-utils \
+        libpoppler-cpp-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container
