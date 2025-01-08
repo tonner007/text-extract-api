@@ -1,5 +1,4 @@
 from marker.convert import convert_single_pdf
-from marker.convert import convert_single_pdf
 from marker.models import load_all_models
 
 from ocr_strategies.ocr_strategy import OCRStrategy

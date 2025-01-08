@@ -1,74 +1,96 @@
 SHELL := /bin/bash
 
-.PHONY: help install run-server start-workers build-docker test clean pull-models scale-workers clear-cache logs list-files delete-file
+.PHONY: help install install-linux install-macos install-requirements start-local-server setup-docker run-docker run-docker-gpu clean clear-cache
 
-# @ChoSH group setup;32;Setup commands
-# @ChoSH group build;34;"Build commands
-# @ChoSH group run;36;Run and execution commands
-# @ChoSH group test;33;Test commands
-# @ChoSH group debug;35;Debugging commands
-# @ChoSH group clean;31;Cleanup commands
+install:
+	@width=$$(tput cols || echo 100); \
+	[ "$$width" -gt "100" ] && width=100; \
+	padding=$$(printf "%$${width}s" "" | tr ' ' '#'); \
+	printf "\n\e[1;34m%s\e[0m\n" "$$padding"; \
+	printf "\e[1;34m###%*sCatchTheTornado/text-extract-api%*s###\e[0m\n" $$(($$width / 2 - 21)) "" $$(($$width / 2 - 17)) ""; \
+	printf "\e[1;34m###%*sAUTOMATIC SETUP%*s###\e[0m\n" $$(($$width / 2 - 9)) "" $$(($$width / 2 - 13)) ""; \
+	printf "%s\n" "$$padding"; \
+	printf "\e[1;34m   Do you want to run the application locally or with Docker?\e[0m\n"; \
+	printf "\e[1;33m   [L] \e[0m Local - Run the application locally\n"; \
+	printf "\e[1;33m   [D] \e[0m Docker - Run the application in Docker\n"; \
+	read -p "   > " choice; \
+	case "$$choice" in \
+		[lL]) echo -e "\033[1;32m   ✔ You chose: Local Setup\033[0m"; $(MAKE) setup-local ;; \
+		[dD]) echo -e "\033[1;32m   ✔ You chose: Docker\033[0m"; $(MAKE) setup-docker ;; \
+		*) echo "Invalid option. Exiting."; exit 1 ;; \
+	esac
 
-.PHONY: listShort
-listShort:
-	grep '^# @ChoSH group' $(MAKEFILE_LIST) | while IFS= read -r line; do \
-	    params=$$(echo $$line | sed 's/^# @ChoSH group //'); \
-	    IFS=";" read -r name color label <<< "$$params"; \
-	    desc=$$(echo $$desc | sed 's/^"\(.*\)"$$/\1/'); \
-	    echo "$$name | $$color | $$label"; \
+setup-local:
+	@while true; do \
+		printf  "\n\e[1;34m   Python setup environment...\e[0m"; \
+		python3 -m venv .venv && source .venv/bin/activate; \
+		printf "\e[1;34m\n   Do you want to install requirements?\e[0m\n"; \
+		printf "\e[1;33m   [y] \e[0m Yes - Install and then run application locally\n"; \
+		printf "\e[1;33m   [n] \e[0m No  - Skip and run application locally \n"; \
+	read -p "   > " choice; \
+		case "$$choice" in \
+			[yY]) \
+				echo -e "\033[1;32m   ✔ Installing Python dependencies...\033[0m"; \
+				$(MAKE) install-requirements; \
+				break; \
+				;; \
+			[nN]|[sS]) \
+				echo -e "\033[1;33m   Skipping requirement installation. Starting the local server instead...\033[0m"; \
+				$(MAKE) start-local-server; \
+				break; \
+				;; \
+			*) \
+				echo -e "\033[1;31m   Invalid input: Please enter 'y', 'n', or 's' to proceed.\033[0m"; \
+				;; \
+		esac; \
 	done
-	@$(call chomh_read_short,$(process_block))
 
-# Displays a list of commands and their descriptions
-help:
-	@echo "Available commands:"
-	@awk 'BEGIN {FS = ":.*?#"} /^[a-zA-Z_-]+:.*?#/ {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
-install:  # Installation of dependencies and preparation of virtual environment
-	python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+install-linux:
+	@echo -e "\033[1;34m   Installing Linux dependencies...\033[0m"; \
+	sudo apt update && sudo apt install -y libmagic1 tesseract-ocr poppler-utils pkg-config
 
-run-server:  # Starting the local application server
-	chmod +x run.sh && ./run.sh
+install-macos:
+	@echo -e "\033[1;34m   Installing macOS dependencies...\033[0m"; \
+	brew update && brew install libmagic tesseract poppler pkg-config ghostscript ffmpeg automake autoconf
 
-start-workers:  # Starting Celery workers
-	celery -A main.celery worker --loglevel=info --pool=solo
+install-requirements:
+	@if [ "$$(uname)" = "Linux" ]; then $(MAKE) install-linux; \
+	elif [ "$$(uname)" = "Darwin" ]; then $(MAKE) install-macos; \
+	else echo "Unsupported OS. Exiting."; exit 1; fi; \
+	pip install -r app/requirements.txt
 
-build-docker:  # Building and starting Docker containers
+start-local-server:
+	@echo "Starting the local application server..."; \
+	./run.sh
+
+setup-docker:
+	@echo -e "\033[1;34m   Available Docker options:\033[0m"; \
+	echo -e "\033[1;33m     1:\033[0m Run Docker containers with CPU support"; \
+	echo -e "\033[1;33m     2:\033[0m Run Docker containers with GPU support"; \
+	read -p "Enter your choice (1 = CPU, 2 = GPU, any other key to exit): " docker_choice; \
+	case "$$docker_choice" in \
+		1) $(MAKE) run-docker ;; \
+		2) $(MAKE) run-docker-gpu ;; \
+		*) echo -e "\033[1;34m   Exiting without starting Docker.\033[0m" ;; \
+	esac
+
+run-docker:
+	@echo -e "\033[1;34m   Starting Docker container with CPU support...\033[0m"; \
 	docker-compose up --build
 
-test:  # Running unit testsyes
-	pytest
+run-docker-gpu:
+	@echo -e "\033[1;34m   Starting Docker container with GPU support...\033[0m"; \
+	docker-compose -f docker-compose.gpu.yml up --build
 
-clean:  # Removing the virtual environment and stopping Docker
-	rm -rf .venv && docker-compose down -v
+clean:
+	@echo "Cleaning project..."; \
+	rm -rf .venv; \
+	docker-compose down -v; \
+	$(MAKE) clean-cache
 
-pull-models:  # Downloading LLama models
-	python client/cli.py llm_pull --model llama3.1
-	python client/cli.py llm_pull --model llama3.2-vision
+clean-cache:
+	find . -type d -name '__pycache__' -exec rm -rf {} + && find . -type f -name '*.pyc' -delete
 
-scale-workers:  # Scaling Celery workers for parallel processing
-	celery -A main.celery worker --loglevel=info --concurrency=4
-
-clear-cache:  # Clearing OCR cache
+clear-cache:
 	python client/cli.py clear_cache
-
-logs:  # Retrieving logs from the Docker application
-	docker-compose logs -f
-
-list-files:  # Listing files stored in storage
-	python client/cli.py list_files
-
-delete-file:  # Deleting a specific file from storage
-	@read -p "Give filename to delete " filename; \
-	python client/cli.py delete_file --file_name $$filename
-
-process_block = \
-    echo "block $$2 of type $$1 has description $$3"
-
-chomh_read_short = \
-	grep '^# @ChoSH group' $(MAKEFILE_LIST) | while IFS= read -r line; do \
-	    params=$$(echo $$line | sed 's/^# @ChoSH group //'); \
-	    IFS=';' read -r name color label <<< "$$params"; \
-	    desc=$$(echo $$desc | sed 's/^"\(.*\)"$$/\1/'); \
-	    echo "$$name | $$color | $$label"; \
-	done

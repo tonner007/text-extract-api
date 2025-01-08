@@ -7,4 +7,4 @@ app/__pycache__/*
 storage/*
 client_secret*.json    
 .env.localhost
-
+.idea
