@@ -105,7 +105,7 @@ class OcrRequest(BaseModel):
             if not file_content.startswith(b'%PDF'):
                 raise ValueError("Invalid file type. Only PDFs are supported.")
         except Exception:
-            raise ValueError("Invalid file content. Must be base64 encoded PDF.")
+            return v
         return v
 
     @field_validator('storage_profile')
@@ -156,7 +156,7 @@ async def ocr_request_endpoint(request: OcrRequest):
     print(f"Processing PDF with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}")
 
     # Asynchronous processing using Celery
-    task = ocr_task.apply_async(args=[file_content, request.strategy, "uploaded_file.pdf", pdf_hash, request.ocr_cache, request.prompt, request.model, request.storage_profile, request.storage_filename])
+    task = ocr_task.apply_async(args=[file_content, request.strategy, "uploaded_file.png", pdf_hash, request.ocr_cache, request.prompt, request.model, request.storage_profile, request.storage_filename])
     return {"task_id": task.id}
 
 @app.get("/ocr/result/{task_id}")
@@ -172,7 +172,7 @@ async def ocr_status(task_id: str):
         task_info = task.info
         if task_info.get('start_time'):
             task_info['elapsed_time'] = time.time() - int(task_info.get('start_time'))
-        return {"state": task.state, "status": task.info.get("status"), "info": task_info } 
+        return {"state": task.state, "status": task.info.get("status"), "info": task_info }
     elif task.state == 'SUCCESS':
         return {"state": task.state, "status": "Task completed successfully.", "result": task.result}
     else:
