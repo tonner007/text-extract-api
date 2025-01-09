@@ -20,3 +20,4 @@ marker-pdf==0.2.6
 boto3
 Pillow
 python-magic
+maker

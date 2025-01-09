@@ -13,7 +13,9 @@ from pydantic import BaseModel, Field, field_validator
 import ollama
 import base64
 from typing import Optional
+import magic
 
+ALLOWED_CONTENT_TYPES = {'application/pdf', 'image/png', 'image/webp', 'image/jpeg', 'image/gif'}
 
 def storage_profile_exists(profile_name: str) -> bool:
     profile_path = os.path.abspath(os.path.join(os.getenv('STORAGE_PROFILE_PATH', '/storage_profiles'), f'{profile_name}.yaml'))
@@ -36,7 +38,7 @@ async def ocr_endpoint(
     storage_filename: str = Form(None)
 ):
     """
-    Endpoint to extract text from an uploaded file using different OCR strategies.
+    Endpoint to extract text from an uploaded PDF file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
     """
     # Validate input
@@ -45,18 +47,27 @@ async def ocr_endpoint(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    if file.content_type is not None and file.content_type != 'application/pdf':
-        raise HTTPException(status_code=400, detail="Invalid file type. Only PDFs are supported.")
+    if not file.content_type or file.content_type not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.content_type}. Allowed: {', '.join(ALLOWED_CONTENT_TYPES)}")
 
-    pdf_bytes = await file.read()
+    mime = magic.Magic(mime=True)
+    detected_mime = mime.from_buffer(await file.read())
 
-    # Generate a hash of the PDF content for caching
-    pdf_hash = md5(pdf_bytes).hexdigest()
+    file_content = await file.read()
+    if detected_mime in {'application/pdf'}:
+        content_type = 'pdf'
+    elif detected_mime in {'image/png', 'image/jpeg', 'image/webp', 'image/gif'}:
+        content_type = 'image'
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported file type detected after validation.")
+
+    # Generate a hash of the uploaded content for caching
+    file_hash = md5(file_content).hexdigest()
 
     print(f"Processing PDF {file.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}")
 
     # Asynchronous processing using Celery
-    task = ocr_task.apply_async(args=[pdf_bytes, strategy, file.filename, pdf_hash, ocr_cache, prompt, model, storage_profile, storage_filename])
+    task = ocr_task.apply_async(args=[file_content, strategy, file.filename, file_hash, content_type, ocr_cache, prompt, model, storage_profile, storage_filename])
     return {"task_id": task.id}
 
 # this is an alias for /ocr - to keep the backward compatibility
@@ -71,7 +82,7 @@ async def ocr_upload_endpoint(
     storage_filename: str = Form(None)
 ):
     """
-    Alias endpoint to extract text from an uploaded PDF file using different OCR strategies.
+    Alias endpoint to extract text from an uploaded file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
     """
     return await ocr_endpoint(strategy, prompt, model, file, ocr_cache, storage_profile, storage_filename)
@@ -83,30 +94,38 @@ class OllamaGenerateRequest(BaseModel):
 class OllamaPullRequest(BaseModel):
     model: str
 
+from typing import Optional, List
+
+# Dynamically format the allowed content types
+allowed_extensions = ", ".join(ALLOWED_CONTENT_TYPES)
+
 class OcrRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
     prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
     model: str = Field(..., description="Model to use for the Ollama endpoint")
-    file: str = Field(..., description="Base64 encoded file")
+    file: str = Field(..., description=f"Base64 encoded file (allowed types: {allowed_extensions})")
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
     storage_filename: Optional[str] = Field(None, description="Storage filename to use")
 
-    @field_validator('strategy')
+
+    @field_validator('file', mode='before')
+    def validate_file(cls, v):
+        try:
+            decoded_content = base64.b64decode(v)
+            mime = magic.Magic(mime=True)
+            detected_mime = mime.from_buffer(decoded_content)
+            if detected_mime not in ALLOWED_CONTENT_TYPES:
+                raise ValueError(f"Invalid file type. Allowed: {', '.join(ALLOWED_CONTENT_TYPES)}")
+        except Exception as e:
+            raise ValueError(f"File validation error: {str(e)}")
+        return v
     def validate_strategy(cls, v):
         if v not in OCR_STRATEGIES:
             raise ValueError(f"Unknown strategy '{v}'. Available: marker, tesseract")
         return v
 
-    @field_validator('file')
-    def validate_file(cls, v):
-        try:
-            file_content = base64.b64decode(v)
-            if not file_content.startswith(b'%PDF'):
-                raise ValueError("Invalid file type. Only PDFs are supported.")
-        except Exception:
-            raise ValueError("Invalid file content. Must be base64 encoded PDF.")
-        return v
+
 
     @field_validator('storage_profile')
     def validate_storage_profile(cls, v):
@@ -146,17 +165,27 @@ async def ocr_request_endpoint(request: OcrRequest):
         print(request_data)
         OcrRequest(**request_data)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
 
     file_content = base64.b64decode(request.file)
 
     # Process the file content as needed
-    pdf_hash = md5(file_content).hexdigest()
+    file_hash = md5(file_content).hexdigest()
+    mime = magic.Magic(mime=True)
+    detected_mime = mime.from_buffer(file_content)
+    if detected_mime in {'application/pdf'}:
+        content_type = 'pdf'
+        filename = "uploaded_file.pdf"
+    elif detected_mime in {'image/png', 'image/jpeg', 'image/webp', 'image/gif'}:
+        content_type = 'image'
+        filename = "uploaded_file.png"
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported file type detected after validation.")
 
     print(f"Processing PDF with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}")
 
     # Asynchronous processing using Celery
-    task = ocr_task.apply_async(args=[file_content, request.strategy, "uploaded_file.pdf", pdf_hash, request.ocr_cache, request.prompt, request.model, request.storage_profile, request.storage_filename])
+    task = ocr_task.apply_async(args=[file_content, request.strategy, "uploaded_file.png", file_hash, content_type, request.ocr_cache, request.prompt, request.model, request.storage_profile, request.storage_filename])
     return {"task_id": task.id}
 
 @app.get("/ocr/result/{task_id}")
@@ -172,7 +201,7 @@ async def ocr_status(task_id: str):
         task_info = task.info
         if task_info.get('start_time'):
             task_info['elapsed_time'] = time.time() - int(task_info.get('start_time'))
-        return {"state": task.state, "status": task.info.get("status"), "info": task_info } 
+        return {"state": task.state, "status": task.info.get("status"), "info": task_info }
     elif task.state == 'SUCCESS':
         return {"state": task.state, "status": "Task completed successfully.", "result": task.result}
     else:

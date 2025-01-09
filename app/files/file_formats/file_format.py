@@ -1,26 +1,45 @@
-from typing import Type, Iterator, Optional
 import base64
+from hashlib import md5
+from typing import Type, Iterator, Optional, Dict, Callable, Union, TypeVar
+from utils.filetype import guess_mime_type
+
+T = TypeVar("T", bound="FileFormat")
+
 
 class FileFormat:
+    default_filename = None
+    default_mime_type = None
+
     def __init__(self, binary_file_content: bytes, filename: str, mime_type: str):
+
         if not binary_file_content:
-            raise ValueError("file_content cannot be empty")
-        if not filename:
-            raise ValueError("filename cannot be empty")
-        if not mime_type:
-            raise ValueError("mime_type cannot be empty")
+            raise ValueError("binary_file_content cannot be empty")
+
+        if filename is None:
+            if FileFormat.default_filename is None:
+                raise ValueError("filename cannot be empty, as no default is set")
+            filename = FileFormat.default_filename
+
+        if mime_type is None:
+            if FileFormat.default_mime_type is None:
+                raise ValueError("mime_type cannot be empty, as no default is set")
+            mime_type = FileFormat.default_mime_type
 
         self._binary_file_content = binary_file_content
         self._filename = filename
         self._mime_type = mime_type
 
     @property
-    def base64(self) -> str:
+    def to_base64(self) -> str:
         """Encodes the given file content to a Base64 string."""
         return base64.b64encode(self._binary_file_content).decode('utf-8')
 
     @property
-    def file_content(self) -> bytes:
+    def to_hash(self) -> str:
+        return md5(self.to_binary).hexdigest()
+
+    @property
+    def to_binary(self) -> bytes:
         return self._binary_file_content
 
     @property
@@ -31,7 +50,6 @@ class FileFormat:
     def mime_type(self) -> str:
         return self._mime_type
 
-    # Methods to implement
     @staticmethod
     def accepted_mime_types() -> list[str]:
         raise NotImplementedError("Subclasses must implement accepted_mime_types.")
@@ -52,7 +70,6 @@ class FileFormat:
             return cls
         raise NotImplementedError("Pageable formats must implement default_iterator_file_format.")
 
-    # Remaining methods
     @classmethod
     def accept_mime_type(cls, mime_type: str) -> bool:
         """
@@ -61,7 +78,7 @@ class FileFormat:
         return mime_type in cls.accepted_mime_types()
 
     @staticmethod
-    def convertable_to() -> dict[str, callable]:
+    def convertable_to() -> Dict[Type["FileFormat"], Callable[[], Iterator["FileFormat"]]]:
         """
         Defines what formats this file type can be converted to.
         Returns a dictionary where keys are target formats and values are functions
@@ -71,33 +88,39 @@ class FileFormat:
         """
         return {}
 
-    def convert_to(self, target_format: Type["FileFormat"]) -> ["FileFormat"]:
+    def convert_to(self, target_format: Type[T]) -> Iterator[T]:
+        # @todo check if this compare is ok
+        if self.__class__ == target_format:
+            yield self
         converters = self.convertable_to()
         if target_format not in converters:
             raise ValueError(f"Cannot convert to {target_format}. Conversion not supported.")
         return converters[target_format]()
 
-    @staticmethod
-    def from_base64(base64_string: str, filename: str, mime_type: str) -> "FileFormat":
+    @classmethod
+    def from_base64(cls, base64_string: str, filename: str, mime_type: str) -> "FileFormat":
         try:
             decoded_content = base64.b64decode(base64_string)
         except (base64.binascii.Error, ValueError):
             raise ValueError("Invalid Base64-encoded input.")
-        return FileFormat(binary_file_content=decoded_content, filename=filename, mime_type=mime_type)
+        return cls.from_binary(binary=decoded_content, filename=filename, mime_type=mime_type)
 
-    @staticmethod
-    def from_binary(binary: bytes, filename: str, mime_type: str) -> "FileFormat":
-        return FileFormat(binary_file_content=binary, filename=filename, mime_type=mime_type)
+    @classmethod
+    def from_binary(cls, binary: bytes, filename: str, mime_type: str) -> Type["FileFormat"]:
+        if mime_type is None:
+            mime_type = guess_mime_type(binary_data=binary, filename=filename)
 
-    @staticmethod
-    def get_format_info(self) -> dict:
+        return cls(binary_file_content=binary, filename=filename, mime_type=mime_type)
+
+    @classmethod
+    def get_format_info(cls) -> dict:
         """
         Returns information about the format, including accepted MIME types, pageable status, and convertible formats.
         """
         return {
-            "mime_types": self.accepted_mime_types(),
-            "pageable": self.is_pageable(),
-            "convertable_to": self.convertable_to()
+            "mime_types": cls.accepted_mime_types(),
+            "pageable": cls.is_pageable(),
+            "convertable_to": cls.convertable_to()
         }
 
     def get_iterator(self, target_format: Optional["FileFormat"]) -> Iterator["FileFormat"]:
@@ -109,11 +132,13 @@ class FileFormat:
         """
         final_format = target_format or self.default_iterator_file_format
 
-        if self.is_pageable:
-            for page in self.get_pages():
-                yield page.convert(final_format)
+        if self.is_pageable():
+            if final_format.is_pageable():
+                raise ValueError("Target format and current format are both pageable. Cannot iterate.")
+            else:
+                yield self.convert_to(final_format)
         else:
-            yield self.convert(final_format)
+            yield self.convert_to(final_format)
 
     def unify(self) -> "FileFormat":
         """
@@ -123,3 +148,21 @@ class FileFormat:
         :return: Unified format as a new self instance.
         """
         return self
+
+    @staticmethod
+    def get_file_format_class(mime_type: str) -> Type["FileFormat"]:
+        for subclass in FileFormat.__subclasses__():
+            if mime_type in subclass.accepted_mime_types():
+                return subclass
+        raise ValueError(f"No matching FileFormat class for MIME type: {mime_type}")
+
+    @staticmethod
+    def _create_file_format(data: Union[bytes, str], filename: Optional[str] = None) -> Type["FileFormat"]:
+        if isinstance(data, str):
+            binary_data = base64.b64decode(data)
+        else:
+            binary_data = data
+
+        mime_type = guess_mime_type(binary_data=binary_data, filename=filename)
+        file_format_class = FileFormat.get_file_format_class(mime_type)
+        return file_format_class(binary_file_content=binary_data, filename=filename or "unknown", mime_type=mime_type)

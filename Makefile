@@ -2,17 +2,27 @@ SHELL := /bin/bash
 
 .PHONY: help install install-linux install-macos install-requirements start-local-server setup-docker run-docker run-docker-gpu clean clear-cache
 
+help:
+	@echo "Available commands:"
+	@echo " make install (recommended)   - Automatic setup for local or Docker"
+	@echo " make start-local-server      - Start the local application server"
+	@echo " setup-docker                - Setup Docker environment"
+	@echo " run-docker                  - Run Docker containers with CPU support"
+	@echo " run-docker-gpu              - Run Docker containers with GPU support"
+	@echo " clean                       - Clean the project environment"
+	@echo " clear-cache                 - Clear application cache"
+
 install:
 	@width=$$(tput cols || echo 100); \
 	[ "$$width" -gt "100" ] && width=100; \
 	padding=$$(printf "%$${width}s" "" | tr ' ' '#'); \
 	printf "\n\e[1;34m%s\e[0m\n" "$$padding"; \
 	printf "\e[1;34m###%*sCatchTheTornado/text-extract-api%*s###\e[0m\n" $$(($$width / 2 - 21)) "" $$(($$width / 2 - 17)) ""; \
-	printf "\e[1;34m###%*sAUTOMATIC SETUP%*s###\e[0m\n" $$(($$width / 2 - 9)) "" $$(($$width / 2 - 13)) ""; \
+	printf "\e[1;34m###%*sAUTOMATIC SETUP%*s###\e[0m\n" $$(($$width / 2 - 10)) "" $$(($$width / 2 - 11)) ""; \
 	printf "%s\n" "$$padding"; \
 	printf "\e[1;34m   Do you want to run the application locally or with Docker?\e[0m\n"; \
 	printf "\e[1;33m   [L] \e[0m Local - Run the application locally\n"; \
-	printf "\e[1;33m   [D] \e[0m Docker - Run the application in Docker\n"; \
+	printf "\e[1;33m   [D] \e[0m Docker - Run the axpplication in Docker\n"; \
 	read -p "   > " choice; \
 	case "$$choice" in \
 		[lL]) echo -e "\033[1;32m   ✔ You chose: Local Setup\033[0m"; $(MAKE) setup-local ;; \

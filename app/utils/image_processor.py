@@ -9,7 +9,7 @@ class ImageFormat(Enum):
     BMP = "BMP"
     TIFF = "TIFF"
 
-class ImageProcessingUtils:
+class ImageProcessor:
     @staticmethod
     def unify_image(image_bytes: bytes, target_format: ImageFormat ="JPEG", convert_to_rgb: bool=True) -> bytes:
         """
@@ -31,18 +31,4 @@ class ImageProcessingUtils:
         buffered = BytesIO()
         image.save(buffered, format=target_format.value)
         return buffered.getvalue()
-
-    @staticmethod
-    def encode_image_to_base64(image_bytes: bytes):
-        """
-        Encodes  image bytes to a base64 string for OCR services that require it.
-        :param image_bytes: Input image in bytes.
-        :return: Base64-encoded string of the image.
-        """
-        return base64.b64encode(image_bytes).decode("utf-8")
-
-    @staticmethod
-    def unify_image_to_base64(image_byes: bytes):
-        unified_image = ImageProcessingUtils.unify_image(image_byes)
-        return ImageProcessingUtils.encode_image_to_base64(unified_image)
 

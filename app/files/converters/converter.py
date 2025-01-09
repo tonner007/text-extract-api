@@ -1,6 +1,6 @@
 from typing import Iterator, List
 
-from file_formats.file_format import FileFormat
+from files.file_formats.file_format import FileFormat
 
 class BaseConverter:
     @staticmethod
