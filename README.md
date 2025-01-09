@@ -1,6 +1,6 @@
-# pdf-extract-api
+# text-extract-api
 
-Convert any image or PDF to Markdown *text* or JSON structured document with super-high accuracy, including tabular data, numbers or math formulas.
+Convert any image, PDF or Office document to Markdown *text* or JSON structured document with super-high accuracy, including tabular data, numbers or math formulas.
 
 The API is built with FastAPI and uses Celery for asynchronous task processing. Redis is used for caching OCR results.
 
@@ -8,10 +8,10 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 
 ## Features:
 - **No Cloud/external dependencies** all you need: PyTorch based OCR (Marker) + Ollama are shipped and configured via `docker-compose` no data is sent outside your dev/server environment,
-- **PDF to Markdown** conversion with very high accuracy using different OCR strategies including [marker](https://github.com/VikParuchuri/marker) and [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [surya-ocr](https://github.com/VikParuchuri/surya) or [tessereact](https://github.com/h/pytesseract)
-- **PDF to JSON** conversion using Ollama supported models (eg. LLama 3.1)
+- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [marker](https://github.com/VikParuchuri/marker) and [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [surya-ocr](https://github.com/VikParuchuri/surya) or [tessereact](https://github.com/h/pytesseract)
+- **PDF/Office to JSON** conversion using Ollama supported models (eg. LLama 3.1)
 - **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
-- **Removing PII** This tool can be used for removing Personally Identifiable Information out of PDF - see `examples`
+- **Removing PII** This tool can be used for removing Personally Identifiable Information out of document - see `examples`
 - **Distributed queue processing** using [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html))
 - **Caching** using Redis - the OCR results can be easily cached prior to LLM processing,
 - **Storage Strategies** switchable storage strategies (Google Drive, Local File System ...)
@@ -39,7 +39,7 @@ Before running the example see [getting started](#getting-started)
 
 ![Converting Invoice to JSON](./screenshots/example-2.png)
 
-**Note:** As you may observe in the example above, `marker-pdf` sometimes mismatches the cols and rows which could have potentially great impact on data accuracy. To improve on it there is a feature request [#3](https://github.com/CatchTheTornado/pdf-extract-api/issues/3) for adding alternative support for [`tabled`](https://github.com/VikParuchuri/tabled) model - which is optimized for tables.
+**Note:** As you may observe in the example above, `marker-pdf` sometimes mismatches the cols and rows which could have potentially great impact on data accuracy. To improve on it there is a feature request [#3](https://github.com/CatchTheTornado/text-extract-api/issues/3) for adding alternative support for [`tabled`](https://github.com/VikParuchuri/tabled) model - which is optimized for tables.
 
 ## Getting started
 
@@ -71,7 +71,7 @@ chmod +x run.sh
 run.sh
 ```
 
-This command will install all the dependencies - including Redis (via Docker, so it is not entirely docker free method of running `pdf-extract-api` anyways :)
+This command will install all the dependencies - including Redis (via Docker, so it is not entirely docker free method of running `text-extract-api` anyways :)
 
 Then you're good to go with running some CLI commands like:
 
@@ -105,7 +105,7 @@ export RESULT_URL=https://doctractor:Aekie2ao@api.doctractor.com/ocr/result/
 python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
 ```
 
-[Demo Source code](https://github.com/CatchTheTornado/pdf-extract-api-demo)
+[Demo Source code](https://github.com/CatchTheTornado/text-extract-api-demo)
 
 **Note:** In the free demo we don't guarantee any processing times. The API is Open so please do **not send any secret documents neither any documents containing personal information**, If you do - you're doing it on your own risk and responsiblity.
 
@@ -159,8 +159,8 @@ To use the `magic` library in this project for file type detection:
 ### Clone the Repository
 
 ```sh
-git clone https://github.com/CatchTheTornado/pdf-extract-api.git
-cd pdf-extract-api
+git clone https://github.com/CatchTheTornado/text-extract-api.git
+cd text-extract-api
 ```
 
 ### Setup environmental variables
@@ -230,7 +230,7 @@ This will start the following services:
 
 ## Cloud - paid edition
 
-If the on-prem is too much hassle [ask us about the hosted/cloud edition](mailto:info@catchthetornado.com?subject=pdf-extract-api%20but%20hosted) of pdf-extract-api, we can setup it you, billed just for the usage.
+If the on-prem is too much hassle [ask us about the hosted/cloud edition](mailto:info@catchthetornado.com?subject=text-extract-api%20but%20hosted) of text-extract-api, we can setup it you, billed just for the usage.
 
 ## CLI tool
 
@@ -261,7 +261,7 @@ python client/cli.py llm_pull --model llama3.1
 python client/cli.py llm_pull --model llama3.2-vision
 ```
 
-These models are required for most features supported by `pdf-extract-api`.
+These models are required for most features supported by `text-extract-api`.
 
 
 ### Upload a File for OCR (converting to Markdown)
@@ -357,20 +357,20 @@ python llm_generate --prompt "Your prompt here"
 
 ## API Clients
 
-You might want to use the decdicated API clients to use `pdf-extract-api`
+You might want to use the decdicated API clients to use `text-extract-api`
 
 ### Typescript
 
-There's a dedicated API client for Typescript - [pdf-extract-api-client](https://github.com/CatchTheTornado/pdf-extract-api-client) and the `npm` package by the same name:
+There's a dedicated API client for Typescript - [text-extract-api-client](https://github.com/CatchTheTornado/text-extract-api-client) and the `npm` package by the same name:
 
 ```bash
-npm install pdf-extract-api-client
+npm install text-extract-api-client
 ```
 
 Usage:
 
 ```js
-import { ApiClient, OcrRequest } from 'pdf-extract-api-client';
+import { ApiClient, OcrRequest } from 'text-extract-api-client';
 const apiClient = new ApiClient('https://api.doctractor.com/', 'doctractor', 'Aekie2ao');
 const formData = new FormData();
 formData.append('file', fileInput.files[0]);
@@ -390,7 +390,7 @@ apiClient.uploadFile(formData).then(response => {
 - **URL**: /ocr/upload
 - **Method**: POST
 - **Parameters**:
-  - **file**: PDF file to be processed.
+  - **file**: PDF, image or Office file to be processed.
   - **strategy**: OCR strategy to use (`marker`, `llama_vision` or `tesseract`).
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result
