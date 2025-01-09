@@ -1,12 +1,11 @@
 SHELL := /bin/bash
 
-.PHONY: help install install-linux install-macos install-requirements start-local-server setup-docker run-docker run-docker-gpu clean clear-cache
+.PHONY: help install install-linux install-macos install-requirements run setup-docker run-docker run-docker-gpu clean clear-cache
 
 help:
 	@echo "Available commands:"
 	@echo " make install (recommended)   - Automatic setup for local or Docker"
-	@echo " make start-local-server      - Start the local application server"
-	@echo " setup-docker                - Setup Docker environment"
+	@echo " make run      - Start the local application server"
 	@echo " run-docker                  - Run Docker containers with CPU support"
 	@echo " run-docker-gpu              - Run Docker containers with GPU support"
 	@echo " clean                       - Clean the project environment"
@@ -46,7 +45,7 @@ setup-local:
 				;; \
 			[nN]|[sS]) \
 				echo -e "\033[1;33m   Skipping requirement installation. Starting the local server instead...\033[0m"; \
-				$(MAKE) start-local-server; \
+				$(MAKE) run; \
 				break; \
 				;; \
 			*) \
@@ -70,7 +69,7 @@ install-requirements:
 	else echo "Unsupported OS. Exiting."; exit 1; fi; \
 	pip install -r app/requirements.txt
 
-start-local-server:
+run:
 	@echo "Starting the local application server..."; \
 	./run.sh
 

@@ -62,7 +62,7 @@ class FileFormat:
         raise NotImplementedError("Subclasses must implement is_pageable.")
 
     @classmethod
-    def default_iterator_file_format(cls) -> "FileFormat":
+    def default_iterator_file_format(cls) -> Type["FileFormat"]:
         """
         Returns the default format for iterating over the file.
         """
@@ -98,7 +98,7 @@ class FileFormat:
         return converters[target_format]()
 
     @classmethod
-    def from_base64(cls, base64_string: str, filename: str, mime_type: str) -> "FileFormat":
+    def from_base64(cls, base64_string: str, filename: str, mime_type: str) -> Type[FileFormat]:
         try:
             decoded_content = base64.b64decode(base64_string)
         except (base64.binascii.Error, ValueError):
@@ -106,7 +106,7 @@ class FileFormat:
         return cls.from_binary(binary=decoded_content, filename=filename, mime_type=mime_type)
 
     @classmethod
-    def from_binary(cls, binary: bytes, filename: str, mime_type: str) -> Type["FileFormat"]:
+    def from_binary(cls, binary: bytes, filename: str, mime_type: str) -> FileFormat:
         if mime_type is None:
             mime_type = guess_mime_type(binary_data=binary, filename=filename)
 
@@ -157,7 +157,7 @@ class FileFormat:
         raise ValueError(f"No matching FileFormat class for MIME type: {mime_type}")
 
     @staticmethod
-    def _create_file_format(data: Union[bytes, str], filename: Optional[str] = None) -> Type["FileFormat"]:
+    def _create_file_format(data: Union[bytes, str], filename: Optional[str] = None) -> FileFormat:
         if isinstance(data, str):
             binary_data = base64.b64decode(data)
         else:

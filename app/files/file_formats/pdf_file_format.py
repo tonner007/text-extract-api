@@ -1,4 +1,4 @@
-from typing import Type, List, Callable, Dict
+from typing import Type, Callable, Dict, Iterator
 
 from files.converters.pdf_to_jpeg import PdfToJpeg
 from files.file_formats.file_format import FileFormat
@@ -19,7 +19,7 @@ class PdfFileFormat(FileFormat):
         return ImageFileFormat
 
     @staticmethod
-    def convertable_to() -> Dict[Type["FileFormat"], Callable[[], List["FileFormat"]]]:
+    def convertable_to() -> Dict[Type["FileFormat"], Callable[[], Iterator["FileFormat"]]]:
         return {
             ImageFileFormat: PdfToJpeg.convert
         }
