@@ -1,8 +1,11 @@
-from extract.ocr_strategies.ocr_strategy import OCRStrategy
-import ollama
 import os
 import time
-from files.file_formats import *
+
+import ollama
+from .ocr_strategy import OCRStrategy
+from app.files import *
+
+
 
 class LlamaVisionOCRStrategy(OCRStrategy):
     """Llama 3.2 Vision OCR Strategy"""

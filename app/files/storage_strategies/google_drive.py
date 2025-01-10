@@ -1,9 +1,11 @@
-import os
 import io
+import os
+
+from app.files.storage_strategies.storage_strategy import StorageStrategy
+from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
-from google.oauth2.service_account import Credentials
-from files.storage_strategies.storage_strategy import StorageStrategy
+
 
 ## Note - this code is using Service Accounts for authentication which are separate accounts other than
 ## your Google account. You can create a service account and download the JSON key file to use it for
@@ -22,7 +24,7 @@ class GoogleDriveStorageStrategy(StorageStrategy):
         # Save content to a temporary file
         with open(file_name, 'wb') as temp_file:
             temp_file.write(content.encode('utf-8'))  # Encode the string to bytes
-        
+
         file_metadata = {
             'name': self.format_file_name(file_name, dest_file_name),
         }
@@ -33,7 +35,7 @@ class GoogleDriveStorageStrategy(StorageStrategy):
         media = MediaFileUpload(file_name, resumable=True)
         file = self.service.files().create(body=file_metadata, media_body=media, fields='id').execute()
         print(f"File ID: {file.get('id')}")
-        
+
         # Remove the temporary file
         os.remove(file_name)
 
@@ -58,7 +60,7 @@ class GoogleDriveStorageStrategy(StorageStrategy):
         return fh.read()
 
     def list(self):
-        query = "" #"mimeType='application/vnd.google-apps.file'"
+        query = ""  # "mimeType='application/vnd.google-apps.file'"
         if self.folder_id:
             query = f"'{self.folder_id}' in parents"
         results = self.service.files().list(q=query, spaces='drive', fields='files(id, name)').execute()

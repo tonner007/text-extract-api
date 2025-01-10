@@ -1,12 +1,13 @@
 from typing import Iterator
-from extract import BaseConverter
+
 from pdf2image import convert_from_bytes
 
-from extract import ImageFileFormat
-from extract import PdfFileFormat
+from .converter import Converter
+from .. import ImageFileFormat
+from .. import PdfFileFormat
 
 
-class PdfToJpeg(BaseConverter):
+class PdfToJpeg(Converter):
 
     @staticmethod
     def convert(file_format: PdfFileFormat) -> Iterator[ImageFileFormat]:

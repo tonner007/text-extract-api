@@ -1,14 +1,18 @@
 import os
-import yaml
-from files.storage_strategies.local_filesystem import LocalFilesystemStorageStrategy
-from files.storage_strategies.google_drive import GoogleDriveStorageStrategy
-from files.storage_strategies.aws_s3 import AWSS3StorageStrategy
 from enum import Enum
+
+import yaml
+
+from .storage_strategies.aws_s3 import AWSS3StorageStrategy
+from .storage_strategies.google_drive import GoogleDriveStorageStrategy
+from .storage_strategies.local_filesystem import LocalFilesystemStorageStrategy
+
 
 class StorageStrategy(Enum):
     LOCAL_FILESYSTEM = "local_filesystem"
     GOOGLE_DRIVE = "google_drive"
     AWS_S3 = "aws_s3"
+
 
 class StorageManager:
     def __init__(self, profile_name):

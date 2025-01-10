@@ -1,17 +1,14 @@
-from enum import Enum
-from PIL import Image
 from io import BytesIO
-import base64
 
-class ImageFormat(Enum):
-    JPEG = "JPEG"
-    PNG = "PNG"
-    BMP = "BMP"
-    TIFF = "TIFF"
+from PIL import Image
+
+from ..file_formats.image_file_format import ImageSupportedExportFormats
+
 
 class ImageProcessor:
     @staticmethod
-    def unify_image(image_bytes: bytes, target_format: ImageFormat ="JPEG", convert_to_rgb: bool=True) -> bytes:
+    def unify_image(image_bytes: bytes, target_format: ImageSupportedExportFormats = "JPEG",
+                    convert_to_rgb: bool = True) -> bytes:
         """
         Prepares an image for OCR by unifying its format and color mode.
         - Converts image to the desired format (e.g., JPEG).
@@ -31,4 +28,3 @@ class ImageProcessor:
         buffered = BytesIO()
         image.save(buffered, format=target_format.value)
         return buffered.getvalue()
-

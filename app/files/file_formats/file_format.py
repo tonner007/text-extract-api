@@ -1,9 +1,9 @@
 import base64
 from hashlib import md5
 from typing import Type, Iterator, Optional, Dict, Callable, Union, TypeVar
-from extract import guess_mime_type
 
 T = TypeVar("T", bound="FileFormat")
+
 
 class FileFormat:
     default_filename = None
@@ -97,7 +97,7 @@ class FileFormat:
         return converters[target_format]()
 
     @classmethod
-    def from_base64(cls, base64_string: str, filename: str, mime_type: str) -> Type[FileFormat]:
+    def from_base64(cls, base64_string: str, filename: str, mime_type: str) -> Type["FileFormat"]:
         try:
             decoded_content = base64.b64decode(base64_string)
         except (base64.binascii.Error, ValueError):
@@ -105,14 +105,18 @@ class FileFormat:
         return cls.from_binary(binary=decoded_content, filename=filename, mime_type=mime_type)
 
     @classmethod
-    def from_binary(cls, binary: bytes, filename: str, mime_type: str) -> FileFormat:
+    def from_binary(cls, binary: bytes, filename: str, mime_type: str) -> Type["FileFormat"]:
+        from ..utils.filetype import guess_mime_type
+
         if mime_type is None:
             mime_type = guess_mime_type(binary_data=binary, filename=filename)
 
         return cls(binary_file_content=binary, filename=filename, mime_type=mime_type)
 
     @classmethod
-    def create(data: Union[bytes, str], filename: Optional[str] = None) -> FileFormat:
+    def create(cls, data: Union[bytes, str], filename: Optional[str] = None) -> Type["FileFormat"]:
+        from app.files.utils.filetype import guess_mime_type, get_file_format_class
+
         if isinstance(data, str):
             binary_data = base64.b64decode(data)
         else:
@@ -167,7 +171,7 @@ class FileFormat:
         raise ValueError(f"No matching FileFormat class for MIME type: {mime_type}")
 
     @staticmethod
-    def _create_file_format(data: Union[bytes, str], filename: Optional[str] = None) -> FileFormat:
+    def _create_file_format(data: Union[bytes, str], filename: Optional[str] = None) -> Type["FileFormat"]:
         if isinstance(data, str):
             binary_data = base64.b64decode(data)
         else:

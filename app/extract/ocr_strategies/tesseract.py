@@ -1,14 +1,15 @@
-import pytesseract
 import cv2
 import numpy as np
+import pytesseract
 
-from extract import FileFormat
-from extract import ImageFileFormat
-from extract.ocr_strategies.ocr_strategy import OCRStrategy
+from app.files import FileFormat
+from app.files import ImageFileFormat
+from .ocr_strategy import OCRStrategy
 
 
 class TesseractOCRStrategy(OCRStrategy):
     """Tesseract OCR Strategy"""
+
     def extract_text(self, file_format: FileFormat):
 
         if file_format.convertable_to(ImageFileFormat):
