@@ -1,8 +1,8 @@
 from typing import Type, Callable, Dict, Iterator
 
-from files.converters.pdf_to_jpeg import PdfToJpeg
-from files.file_formats.file_format import FileFormat
-from files.file_formats.image_file_format import ImageFileFormat
+from extract import PdfToJpeg
+from extract import FileFormat
+from extract import ImageFileFormat
 
 
 class PdfFileFormat(FileFormat):

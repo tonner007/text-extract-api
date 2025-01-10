@@ -1,5 +1,3 @@
-from files.file_formats.pdf_file_format import PdfFileFormat, FileFormat
-
 
 class OCRStrategy:
 

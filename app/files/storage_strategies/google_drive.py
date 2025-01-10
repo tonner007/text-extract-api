@@ -1,10 +1,9 @@
 import os
 import io
-import pickle
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
 from google.oauth2.service_account import Credentials
-from storage_strategies.storage_strategy import StorageStrategy
+from files.storage_strategies.storage_strategy import StorageStrategy
 
 ## Note - this code is using Service Accounts for authentication which are separate accounts other than
 ## your Google account. You can create a service account and download the JSON key file to use it for

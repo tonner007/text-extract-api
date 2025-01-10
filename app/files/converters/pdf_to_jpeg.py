@@ -1,9 +1,9 @@
 from typing import Iterator
-from files.converters.converter import BaseConverter
+from extract import BaseConverter
 from pdf2image import convert_from_bytes
 
-from files.file_formats.image_file_format import ImageFileFormat
-from files.file_formats.pdf_file_format import PdfFileFormat
+from extract import ImageFileFormat
+from extract import PdfFileFormat
 
 
 class PdfToJpeg(BaseConverter):

@@ -1,6 +1,6 @@
 import boto3
 from botocore.exceptions import EndpointConnectionError, ClientError
-from storage_strategies.storage_strategy import StorageStrategy
+from files.storage_strategies.storage_strategy import StorageStrategy
 
 class AWSS3StorageStrategy(StorageStrategy):
     def __init__(self, context):

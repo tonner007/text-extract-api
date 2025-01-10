@@ -1,7 +1,7 @@
 from typing import Type
 
-from files.file_formats.file_format import FileFormat
-from utils.image_processor import ImageProcessor, ImageFormat
+from extract import FileFormat
+from extract import ImageProcessor
 
 class ImageFileFormat(FileFormat):
     @staticmethod
@@ -12,6 +12,7 @@ class ImageFileFormat(FileFormat):
     def is_pageable() -> bool:
         return False
 
+
     @classmethod
     def default_iterator_file_format(cls) -> Type["ImageFileFormat"]:
         return cls
@@ -19,4 +20,3 @@ class ImageFileFormat(FileFormat):
     def unify(self) -> "FileFormat":
         unified_image = ImageProcessor.unify_image(self.to_binary, ImageFormat.JPEG)
         return ImageFileFormat.from_binary(unified_image, self.filename, self.mime_type)
-

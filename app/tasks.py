@@ -1,12 +1,14 @@
 import time
+from typing import Optional
+
 from celery_config import celery
-from ocr_strategies.marker import MarkerOCRStrategy
-from ocr_strategies.tesseract import TesseractOCRStrategy
-from ocr_strategies.llama_vision import LlamaVisionOCRStrategy
+from extract.ocr_strategies.marker import MarkerOCRStrategy
+from extract.ocr_strategies.tesseract import TesseractOCRStrategy
+from extract.ocr_strategies.llama_vision import LlamaVisionOCRStrategy
 import redis
 import os
 import ollama
-from storage_manager import StorageManager
+from files.storage_manager import StorageManager
 
 OCR_STRATEGIES = {
     'marker': MarkerOCRStrategy(),
@@ -19,7 +21,18 @@ redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
 
 @celery.task(bind=True)
-def ocr_task(self, pdf_bytes, strategy_name, pdf_filename, pdf_hash, ocr_cache, prompt, model, storage_profile, storage_filename=None):
+def ocr_task(
+        self,
+        byes: bytes,
+        strategy_name: str,
+        filename: str,
+        file_hash: str,
+        ocr_cache: bool,
+        prompt: str,
+        model: str,
+        storage_profile: str,
+        storage_filename: Optional[str] = None
+):
     """
     Celery task to perform OCR processing on a PDF/Office/image file.
     """
@@ -34,7 +47,7 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_filename, pdf_hash, ocr_cache, 
 
     extracted_text = None
     if ocr_cache:
-        cached_result = redis_client.get(pdf_hash)
+        cached_result = redis_client.get(file_hash)
         if cached_result:
             # Return cached result if available
             extracted_text = cached_result.decode('utf-8')
@@ -43,7 +56,7 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_filename, pdf_hash, ocr_cache, 
         print("Extracting text from PDF...")
         elapsed_time = time.time() - start_time
         self.update_state(state='PROGRESS', meta={'progress': 30, 'status': 'Extracting text from PDF', 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
-        extracted_text = ocr_strategy.extract_text_from_pdf(pdf_bytes)
+        extracted_text = ocr_strategy.extract_text_from_pdf(byes)
     else:
         print("Using cached result...")
 
@@ -51,7 +64,7 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_filename, pdf_hash, ocr_cache, 
     self.update_state(state='PROGRESS', meta={'progress': 50, 'status': 'Text extracted', 'extracted_text': extracted_text, 'start_time': start_time, 'elapsed_time': time.time() - start_time})  # Example progress update
 
     if ocr_cache:
-        redis_client.set(pdf_hash, extracted_text)
+        redis_client.set(file_hash, extracted_text)
 
     if prompt:
         print("Transforming text using LLM (prompt={prompt}, model={model}) ...")
@@ -66,10 +79,10 @@ def ocr_task(self, pdf_bytes, strategy_name, pdf_filename, pdf_hash, ocr_cache, 
 
     if storage_profile:
         if not storage_filename:
-            storage_filename = pdf_filename.replace('.pdf', '.md')
+            storage_filename = filename.replace('.pdf', '.md')
 
         storage_manager = StorageManager(storage_profile)
-        storage_manager.save(pdf_filename, storage_filename, extracted_text)
+        storage_manager.save(filename, storage_filename, extracted_text)
 
     self.update_state(state='DONE', meta={'progress': 100, 'status': 'Processing done!', 'start_time': start_time, 'elapsed_time': time.time() - start_time})
 

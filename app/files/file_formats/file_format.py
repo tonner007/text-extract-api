@@ -1,10 +1,9 @@
 import base64
 from hashlib import md5
 from typing import Type, Iterator, Optional, Dict, Callable, Union, TypeVar
-from utils.filetype import guess_mime_type
+from extract import guess_mime_type
 
 T = TypeVar("T", bound="FileFormat")
-
 
 class FileFormat:
     default_filename = None
@@ -111,6 +110,17 @@ class FileFormat:
             mime_type = guess_mime_type(binary_data=binary, filename=filename)
 
         return cls(binary_file_content=binary, filename=filename, mime_type=mime_type)
+
+    @classmethod
+    def create(data: Union[bytes, str], filename: Optional[str] = None) -> FileFormat:
+        if isinstance(data, str):
+            binary_data = base64.b64decode(data)
+        else:
+            binary_data = data
+
+        mime_type = guess_mime_type(binary_data=binary_data, filename=filename)
+        file_format_class = get_file_format_class(mime_type)
+        return file_format_class(binary_file_content=binary_data, filename=filename or "unknown", mime_type=mime_type)
 
     @classmethod
     def get_format_info(cls) -> dict:

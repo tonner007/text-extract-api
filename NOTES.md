@@ -8,6 +8,7 @@
 - Filetype guesser
 - Architektura zamieniania
 
+### Drzewo 
 
 ```aiignore
 project/
@@ -53,3 +54,27 @@ project/
 │   │   └── config.py                
 │   └── main.py                
 ```
+
+### Drzewo v2
+----
+
+```^ v2 maly update do przegadania
+│   ├── files/          #      Moduł odpowiedzialny za pliki ogólnie
+│   │   ├── __init__.py #  wyczytalem że takie pliiki powinniśmy wrzucać
+│   │   ├── formats/             # Formaty czyli to co zrobiłem dzisija
+│   │   │   ├── __init__.py
+│   │   │   ├── pdf_file_format.py   
+│   │   │   ├── image_file_format.py 
+│   │   ├── file_format.py # interfejs
+│   │   ├── file_format_factory.py # factory
+```
+
+
+readedpython tricks
+
+### add project to repository root to keep it namespaced better (no need to use .. from one module to another)
+
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))

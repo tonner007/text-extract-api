@@ -2,9 +2,9 @@ import pytesseract
 import cv2
 import numpy as np
 
-from files.file_formats.file_format import FileFormat
-from files.file_formats.image_file_format import ImageFileFormat
-from ocr_strategies.ocr_strategy import OCRStrategy
+from extract import FileFormat
+from extract import ImageFileFormat
+from extract.ocr_strategies.ocr_strategy import OCRStrategy
 
 
 class TesseractOCRStrategy(OCRStrategy):
