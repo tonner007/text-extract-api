@@ -1,11 +1,14 @@
-from celery import Celery
 import os
+
+from celery import Celery
 from dotenv import load_dotenv
 
 load_dotenv(".env")
 
 import multiprocessing
+
 multiprocessing.set_start_method("spawn", force=True)
+
 
 def make_celery():
     celery = Celery(
@@ -17,5 +20,6 @@ def make_celery():
         "worker_max_memory_per_child": 8200000
     })
     return celery
+
 
 celery = make_celery()

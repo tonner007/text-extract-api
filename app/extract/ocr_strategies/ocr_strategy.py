@@ -1,3 +1,7 @@
+from app.files import FileFormat
+from app.files import PdfFileFormat
+
+
 class OCRStrategy:
 
     def __init__(self):
@@ -10,7 +14,12 @@ class OCRStrategy:
     def update_state(self, state, meta):
         if self.update_state_callback:
             self.update_state_callback(state, meta)
-                
-    """Base OCR Strategy Interface"""
+
     def extract_text_from_pdf(self, pdf_bytes):
+        # Leave for backward compatibility
+        self.extract_text(PdfFileFormat.from_binary(pdf_bytes))
+
+    """Base OCR Strategy Interface"""
+
+    def extract_text(self, file_format: FileFormat):
         raise NotImplementedError("Subclasses must implement this method")

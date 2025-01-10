@@ -1,3 +1,5 @@
+#!/bin/bash
+
 pip install -r app/requirements.txt
 
 if [ ! -f .env.localhost ]; then

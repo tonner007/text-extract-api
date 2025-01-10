@@ -115,6 +115,42 @@ python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --pr
 
 ## Getting started with Docker
 
+### Dependency: `python-magic`
+
+#### Installation Guide
+
+To use the `magic` library in this project for file type detection:
+
+1. **Install `python-magic` Package:**
+
+   Run the following command to install the required Python library:
+
+   ```bash
+   pip install python-magic
+   ```
+
+2. **Install System Dependency (`libmagic`):**
+
+   - On **macOS**:
+
+     ```bash
+     brew install libmagic
+     ```
+
+   - On **Linux** (Debian/Ubuntu-based distros):
+
+     ```bash
+     sudo apt-get install libmagic1
+     ```
+
+3. **Add to `requirements.txt`:**
+
+   Ensure the dependency is listed in the `requirements.txt` file like this:
+
+   ```plain text
+   python-magic
+   ```
+
 ### Prerequisites
 
 - Docker
