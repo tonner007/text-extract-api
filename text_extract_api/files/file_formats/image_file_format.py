@@ -10,6 +10,8 @@ class ImageSupportedExportFormats(Enum):
     TIFF = "TIFF"
 
 class ImageFileFormat(FileFormat):
+    default_filename = 'jpg'
+
     @staticmethod
     def accepted_mime_types() -> list[str]:
         return ["image/jpeg", "image/png", "image/bmp", "image/gif", "image/tiff"]
