@@ -11,8 +11,8 @@
 ### Drzewo 
 
 ```aiignore
-project/
-├── app/                           
+text-extract-api/
+├── pdf_exttract_api/                           
 │   ├── api/           # Wystawione endpointy 
 │   │   ├── ocr_endpoints.py        
 │   │   ├── file_endpoints.py     
@@ -69,12 +69,10 @@ project/
 │   │   ├── file_format_factory.py # factory
 ```
 
+---
 
-readedpython tricks
+### 2024-01-11 13:11 - requirements uspójniony 
+- Po wstępnej weryfikacji nie ma w naszym przypadku sensu wydzielna requirementsów per te mały utilsy, szczególnie jeżeli są uruchamiane na .venv bo to trafia do tego samego miejsca z paczkami
 
-### add project to repository root to keep it namespaced better (no need to use .. from one module to another)
+### 2024-01-11 13:14 - 
 
-import sys
-import os
-
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))

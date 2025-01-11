@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pip install -r requirements/base.txt
+pip install -r requirements.txt
 
 if [ ! -f .env.localhost ]; then
   cp .env.localhost.example .env.localhost
