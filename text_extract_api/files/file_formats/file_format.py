@@ -79,7 +79,7 @@ class FileFormat:
         return mime_type in cls.accepted_mime_types()
 
     @staticmethod
-    def convertable_to() -> Dict[Type["FileFormat"], Callable[[], Iterator["FileFormat"]]]:
+    def convertible_to() -> Dict[Type["FileFormat"], Callable[[], Iterator["FileFormat"]]]:
         """
         Defines what formats this file type can be converted to.
         Returns a dictionary where keys are target formats and values are functions
@@ -93,7 +93,7 @@ class FileFormat:
         # @todo check if this compare is ok
         if self.__class__ == target_format:
             yield self
-        converters = self.convertable_to()
+        converters = self.convertible_to()
         if target_format not in converters:
             raise ValueError(f"Cannot convert to {target_format}. Conversion not supported.")
         return converters[target_format]()
@@ -136,7 +136,7 @@ class FileFormat:
         return {
             "mime_types": cls.accepted_mime_types(),
             "pageable": cls.is_pageable(),
-            "convertable_to": cls.convertable_to()
+            "convertible_to": cls.convertible_to()
         }
 
     def get_iterator(self, target_format: Optional["FileFormat"]) -> Iterator["FileFormat"]:

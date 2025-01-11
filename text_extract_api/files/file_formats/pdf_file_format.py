@@ -19,7 +19,7 @@ class PdfFileFormat(FileFormat):
         return ImageFileFormat
 
     @staticmethod
-    def convertable_to() -> Dict[Type["FileFormat"], Callable[[], Iterator["FileFormat"]]]:
+    def convertible_to() -> Dict[Type["FileFormat"], Callable[[], Iterator["FileFormat"]]]:
         return {
             ImageFileFormat: PdfToJpeg.convert
         }
