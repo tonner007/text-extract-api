@@ -4,6 +4,7 @@ from typing import Type
 from text_extract_api.files.file_formats.file_format import FileFormat
 from text_extract_api.files.utils.image_processor import ImageProcessor
 
+
 class ImageSupportedExportFormats(Enum):
     JPEG = "JPEG"
     PNG = "PNG"

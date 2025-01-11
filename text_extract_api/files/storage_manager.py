@@ -8,6 +8,7 @@ from text_extract_api.files.storage_strategies.google_drive import GoogleDriveSt
 from text_extract_api.files.storage_strategies.local_filesystem import LocalFilesystemStorageStrategy
 from text_extract_api.files.storage_strategies.storage_strategy import StorageStrategy
 
+
 class StorageStrategy(Enum):
     LOCAL_FILESYSTEM = "local_filesystem"
     GOOGLE_DRIVE = "google_drive"

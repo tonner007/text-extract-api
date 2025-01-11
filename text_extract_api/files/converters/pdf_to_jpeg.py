@@ -2,11 +2,10 @@ from typing import Iterator
 
 from pdf2image import convert_from_bytes
 
-
-
 from text_extract_api.files.converters.converter import Converter
 from text_extract_api.files.file_formats.image_file_format import ImageFileFormat
 from text_extract_api.files.file_formats.pdf_file_format import PdfFileFormat
+
 
 class PdfToJpeg(Converter):
 

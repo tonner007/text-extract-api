@@ -1,8 +1,7 @@
 from typing import Iterator, List
 
-
-
 from text_extract_api.files.file_formats.file_format import FileFormat
+
 
 class Converter:
     @staticmethod
