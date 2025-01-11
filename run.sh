@@ -27,7 +27,7 @@ echo "Downloading models"
 python -c 'from marker.models import load_all_models; load_all_models()'
 
 echo "Starting Celery worker"
-celery -A text_extract_api.celery_config worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
+celery -A text_extract_api.tasks worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
 
 echo "Starting FastAPI server"
 if [ $APP_ENV = 'production' ]; then 

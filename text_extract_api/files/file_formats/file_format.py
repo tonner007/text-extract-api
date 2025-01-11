@@ -97,7 +97,7 @@ class FileFormat:
         return converters[target_format]()
 
     @staticmethod
-    def from_base64(base64_string: str, filename: str, mime_type: str) -> Type["FileFormat"]:
+    def from_base64(base64_string: str, filename: str = None, mime_type: str = None) -> Type["FileFormat"]:
         try:
             decoded_content = base64.b64decode(base64_string)
         except (base64.binascii.Error, ValueError):
@@ -105,12 +105,16 @@ class FileFormat:
         return FileFormat.from_binary(binary=decoded_content, filename=filename, mime_type=mime_type)
 
     @staticmethod
-    def from_binary(binary: bytes, filename: str, mime_type: str) -> Type["FileFormat"]:
+    def from_binary(binary: bytes, filename: Optional[str] = None, mime_type: Optional[str] = None) -> Type["FileFormat"]:
         if mime_type is None:
             mime_type = filetype.guess_mime_type(binary_data=binary, filename=filename)
 
         file_format_class = FileFormat.get_file_format_class(mime_type)
-        return file_format_class(binary_file_content=binary_data, filename=filename or "unknown", mime_type=mime_type)
+
+        if not filename:
+            filename = file_format_class.default_filename
+
+        return file_format_class(binary_file_content=binary_data, filename=filename, mime_type=mime_type)
 
     @classmethod
     def get_format_info(cls) -> dict:

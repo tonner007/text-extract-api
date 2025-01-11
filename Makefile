@@ -1,7 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: help install install-linux install-macos install-requirements run setup-docker run-docker run-docker-gpu clean clear-cache
-
+.PHONY: help
 help:
 	@echo "Available commands:"
 	@echo " make install (recommended)   - Automatic setup for local or Docker"
@@ -11,6 +10,7 @@ help:
 	@echo " clean                       - Clean the project environment"
 	@echo " clear-cache                 - Clear application cache"
 
+.PHONY: install
 install:
 	@width=$$(tput cols || echo 100); \
 	[ "$$width" -gt "100" ] && width=100; \
@@ -29,6 +29,7 @@ install:
 		*) echo "Invalid option. Exiting."; exit 1 ;; \
 	esac
 
+.PHONY: setup-local
 setup-local:
 	@if [ ! -f .env ]; then \
 		printf  "\n\e[1;34m Copy .env.localhost to .env \e[0m"; \
@@ -58,15 +59,17 @@ setup-local:
 		esac; \
 	done
 
-
+.PHONY: install-linux
 install-linux:
 	@echo -e "\033[1;34m   Installing Linux dependencies...\033[0m"; \
 	sudo apt update && sudo apt install -y libmagic1 tesseract-ocr poppler-utils pkg-config
 
+.PHONY: install-macos
 install-macos:
 	@echo -e "\033[1;34m   Installing macOS dependencies...\033[0m"; \
 	brew update && brew install libmagic tesseract poppler pkg-config ghostscript ffmpeg automake autoconf
 
+.PHONY: install-requirements
 install-requirements:
 	@if [ "$$(uname)" = "Linux" ]; then $(MAKE) install-linux; \
 	elif [ "$$(uname)" = "Darwin" ]; then $(MAKE) install-macos; \
@@ -76,10 +79,12 @@ install-requirements:
 	pip install -r requirements/base.txt
 	pip install -e .
 
+.PHONY: run
 run:
 	@echo "Starting the local application server..."; \
 	./run.sh
 
+.PHONY: setup-docker
 setup-docker:
 	@echo -e "\033[1;34m   Available Docker options:\033[0m"; \
 	echo -e "\033[1;33m     1:\033[0m Run Docker containers with CPU support"; \
@@ -91,30 +96,22 @@ setup-docker:
 		*) echo -e "\033[1;34m   Exiting without starting Docker.\033[0m" ;; \
 	esac
 
+.PHONY: run-docker
 run-docker:
 	@echo -e "\033[1;34m   Starting Docker container with CPU support...\033[0m"; \
 	docker-compose up --build
 
+.PHONY: run-docker-gpu
 run-docker-gpu:
 	@echo -e "\033[1;34m   Starting Docker container with GPU support...\033[0m"; \
 	docker-compose -f docker-compose.gpu.yml up --build
 
+.PHONY: clean
 clean:
 	@echo "Cleaning project..."; \
 	docker-compose down -v; \
 	$(MAKE) clean-cache
 
+.PHONY: clean-python-cache
 clean-cache:
 	find . -type d -name '__pycache__' -exec rm -rf {} + && find . -type f -name '*.pyc' -delete
-
-clear-cache:
-	python client/cli.py clear_cache
-
-python-version:
-	@python --version
-	@which python
-	$(MAKE) asd
-
-asd:
-	@python --version
-	@which python

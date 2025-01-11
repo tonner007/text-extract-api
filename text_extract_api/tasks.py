@@ -5,7 +5,7 @@ from typing import Optional
 import ollama
 import redis
 
-from celery_config import celery
+from text_extract_api.celery_config import celery
 
 from text_extract_api.extract.ocr_strategies.marker import MarkerOCRStrategy
 from text_extract_api.extract.ocr_strategies.tesseract import TesseractOCRStrategy

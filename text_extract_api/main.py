@@ -162,7 +162,6 @@ async def ocr_request_endpoint(request: OcrRequest):
     # Validate input
     request_data = request.model_dump()
     try:
-        print(request_data)
         OcrRequest(**request_data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
