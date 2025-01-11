@@ -1,6 +1,6 @@
 services:
   web:
-    build: ./app
+    build: text_extract_api
     container_name: fastapi_app
     command: >
       bash -c "
@@ -29,10 +29,10 @@ services:
     volumes:
       - ./storage_profiles:/storage_profiles  # Mount the storage profiles to enable file uploads
       - ./storage:/storage  # Mount the storage directory to enable file uploads
-      - ./app:/app  # Mount the app directory to enable auto-reloading      
+      - ./text_extract_api:/text_extract_api  # Mount the text_extract_api directory to enable auto-reloading
 
   celery_worker:
-    build: ./app
+    build: text_extract_api
     container_name: celery_worker
     command: celery -A main.celery worker --loglevel=info --pool=solo
     environment:
@@ -49,7 +49,7 @@ services:
     volumes:
       - ./storage_profiles:/storage_profiles  # Mount the storage profiles to enable file uploads
       - ./storage:/storage  # Mount the storage directory to enable file uploads
-      - ./app:/app
+      - ./text_extract_api:/text_extract_api
 
   redis:
     image: redis:7.2.4-alpine
