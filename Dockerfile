@@ -19,14 +19,13 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container
-COPY requirements.txt .
+COPY requirements/base.txt .
 
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install any needed packages specified in base.txt
+RUN pip install --no-cache-dir -r base.txt
 
 # Copy the rest of the application code
-COPY . .
+COPY client .
 
 # Expose the port the FastAPI text_extract_api runs on
 EXPOSE 8000

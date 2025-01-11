@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pip install -r app/requirements.txt
+pip install -r requirements/base.txt
 
 if [ ! -f .env.localhost ]; then
   cp .env.localhost.example .env.localhost
@@ -24,15 +24,14 @@ echo "Your ENV settings loaded from .env.localhost file: "
 printenv
 
 echo "Downloading models"
-RUN python -c 'from marker.models import load_all_models; load_all_models()'
+python -c 'from marker.models import load_all_models; load_all_models()'
 
 echo "Starting Celery worker"
-cd app
-celery -A main.celery worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
+celery -A text_extract_api.celery_config worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
 
 echo "Starting FastAPI server"
 if [ $APP_ENV = 'production' ]; then 
-    uvicorn main:app --host 0.0.0.0 --port 8000;
+    uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000;
 else 
-    uvicorn main:app --host 0.0.0.0 --port 8000 --reload;  
+    uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload;
 fi

@@ -20,10 +20,12 @@ import base64
 from typing import Optional
 
 def storage_profile_exists(profile_name: str) -> bool:
-    profile_path = os.path.abspath(
-        os.path.join(os.getenv('STORAGE_PROFILE_PATH', '/storage_profiles'), f'{profile_name}.yaml'))
-    return os.path.isfile(profile_path)
-
+    profile_path = os.path.abspath(os.path.join(os.getenv('STORAGE_PROFILE_PATH', '/storage_profiles'), f'{profile_name}.yaml'))
+    if not os.path.isfile(profile_path) and profile_path.startswith('..'):
+        # backward compability for ../storage_manager in .env
+        sub_profile_path = os.path.normpath(os.path.join('.', profile_path))
+        return os.path.isfile(sub_profile_path)
+    return True
 
 app = FastAPI()
 

@@ -21,3 +21,4 @@ boto3
 Pillow
 python-magic
 maker
+setuptools

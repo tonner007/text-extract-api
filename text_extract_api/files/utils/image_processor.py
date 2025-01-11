@@ -4,7 +4,6 @@ from PIL import Image
 
 from text_extract_api.files.file_formats.image_file_format import ImageSupportedExportFormats
 
-
 class ImageProcessor:
     @staticmethod
     def unify_image(image_bytes: bytes, target_format: ImageSupportedExportFormats = "JPEG",

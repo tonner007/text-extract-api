@@ -1,11 +1,9 @@
 import base64
 from hashlib import md5
 from typing import Type, Iterator, Optional, Dict, Callable, Union, TypeVar
-
-from files.utils.filetype import guess_mime_type
+from text_extract_api.files.utils import filetype
 
 T = TypeVar("T", bound="FileFormat")
-
 
 class FileFormat:
     default_filename = None
@@ -98,34 +96,20 @@ class FileFormat:
             raise ValueError(f"Cannot convert to {target_format}. Conversion not supported.")
         return converters[target_format]()
 
-    @classmethod
-    def from_base64(cls, base64_string: str, filename: str, mime_type: str) -> Type["FileFormat"]:
+    @staticmethod
+    def from_base64(base64_string: str, filename: str, mime_type: str) -> Type["FileFormat"]:
         try:
             decoded_content = base64.b64decode(base64_string)
         except (base64.binascii.Error, ValueError):
             raise ValueError("Invalid Base64-encoded input.")
-        return cls.from_binary(binary=decoded_content, filename=filename, mime_type=mime_type)
+        return FileFormat.from_binary(binary=decoded_content, filename=filename, mime_type=mime_type)
 
-    @classmethod
-    def from_binary(cls, binary: bytes, filename: str, mime_type: str) -> Type["FileFormat"]:
-        from ..utils.filetype import guess_mime_type
-
+    @staticmethod
+    def from_binary(binary: bytes, filename: str, mime_type: str) -> Type["FileFormat"]:
         if mime_type is None:
-            mime_type = guess_mime_type(binary_data=binary, filename=filename)
+            mime_type = filetype.guess_mime_type(binary_data=binary, filename=filename)
 
-        return cls(binary_file_content=binary, filename=filename, mime_type=mime_type)
-
-    @classmethod
-    def create(cls, data: Union[bytes, str], filename: Optional[str] = None) -> Type["FileFormat"]:
-        from text_extract_api.files.utils.filetype import guess_mime_type, get_file_format_class
-
-        if isinstance(data, str):
-            binary_data = base64.b64decode(data)
-        else:
-            binary_data = data
-
-        mime_type = guess_mime_type(binary_data=binary_data, filename=filename)
-        file_format_class = get_file_format_class(mime_type)
+        file_format_class = FileFormat.get_file_format_class(mime_type)
         return file_format_class(binary_file_content=binary_data, filename=filename or "unknown", mime_type=mime_type)
 
     @classmethod
@@ -171,14 +155,3 @@ class FileFormat:
             if mime_type in subclass.accepted_mime_types():
                 return subclass
         raise ValueError(f"No matching FileFormat class for MIME type: {mime_type}")
-
-    @staticmethod
-    def _create_file_format(data: Union[bytes, str], filename: Optional[str] = None) -> Type["FileFormat"]:
-        if isinstance(data, str):
-            binary_data = base64.b64decode(data)
-        else:
-            binary_data = data
-
-        mime_type = guess_mime_type(binary_data=binary_data, filename=filename)
-        file_format_class = FileFormat.get_file_format_class(mime_type)
-        return file_format_class(binary_file_content=binary_data, filename=filename or "unknown", mime_type=mime_type)

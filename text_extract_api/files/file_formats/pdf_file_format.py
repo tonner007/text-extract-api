@@ -1,9 +1,7 @@
+from __future__ import annotations
 from typing import Type, Callable, Dict, Iterator
 
-from text_extract_api.files.converters.pdf_to_jpeg import PdfToJpeg
 from text_extract_api.files.file_formats.file_format import FileFormat
-from text_extract_api.files.file_formats.image_file_format import ImageFileFormat
-
 
 class PdfFileFormat(FileFormat):
     @staticmethod
@@ -15,11 +13,15 @@ class PdfFileFormat(FileFormat):
         return True
 
     @classmethod
-    def default_iterator_file_format(cls) -> Type[ImageFileFormat]:
+    def default_iterator_file_format(cls) -> Type[FileFormat]:
+        from text_extract_api.files.file_formats.image_file_format import ImageFileFormat
         return ImageFileFormat
 
     @staticmethod
     def convertible_to() -> Dict[Type["FileFormat"], Callable[[], Iterator["FileFormat"]]]:
+        from text_extract_api.files.file_formats.image_file_format import ImageFileFormat
+        from text_extract_api.files.converters.pdf_to_jpeg import PdfToJpeg
+
         return {
             ImageFileFormat: PdfToJpeg.convert
         }

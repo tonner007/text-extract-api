@@ -1,7 +1,7 @@
 services:
   web:
     build:
-      context: text_extract_api # Keep the build context as the root directory
+      context: . # Keep the build context as the root directory
       dockerfile: Dockerfile.gpu # Specify the new path to the GPU Dockerfile
 
     container_name: fastapi_app
@@ -32,7 +32,7 @@ services:
     volumes:
       - ./storage_profiles:/storage_profiles  # Mount the storage profiles to enable file uploads
       - ./storage:/storage  # Mount the storage directory to enable file uploads
-      - ./text_extract_api:/text_extract_api  # Mount the text_extract_api directory to enable auto-reloading
+      - .:/app  # Mount the app directory to enable auto-reloading
     deploy:
       resources:
         reservations:
@@ -41,7 +41,7 @@ services:
 
   celery_worker:
     build:
-      context: text_extract_api  # Keep the build context as the root directory
+      context: .  # Keep the build context as the root directory
       dockerfile: Dockerfile.gpu # Specify the new path to the GPU Dockerfile
     container_name: celery_worker
     command: celery -A main.celery worker --loglevel=info --pool=solo
@@ -59,7 +59,7 @@ services:
     volumes:
       - ./storage_profiles:/storage_profiles  # Mount the storage profiles to enable file uploads
       - ./storage:/storage  # Mount the storage directory to enable file uploads
-      - ./text_extract_api:/text_extract_api
+      - .:/app
     deploy:
       resources:
         reservations:
@@ -86,4 +86,3 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-

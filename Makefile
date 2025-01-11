@@ -30,9 +30,12 @@ install:
 	esac
 
 setup-local:
+	@if [ ! -f .env ]; then \
+		printf  "\n\e[1;34m Copy .env.localhost to .env \e[0m"; \
+	  	cp .env.localhost .env; \
+	fi
 	@while true; do \
 		printf  "\n\e[1;34m   Python setup environment...\e[0m"; \
-		python3 -m venv .venv && source .venv/bin/activate; \
 		printf "\e[1;34m\n   Do you want to install requirements?\e[0m\n"; \
 		printf "\e[1;33m   [y] \e[0m Yes - Install and then run application locally\n"; \
 		printf "\e[1;33m   [n] \e[0m No  - Skip and run application locally \n"; \
@@ -41,6 +44,7 @@ setup-local:
 			[yY]) \
 				echo -e "\033[1;32m   ✔ Installing Python dependencies...\033[0m"; \
 				$(MAKE) install-requirements; \
+				$(MAKE) run; \
 				break; \
 				;; \
 			[nN]|[sS]) \
@@ -67,7 +71,10 @@ install-requirements:
 	@if [ "$$(uname)" = "Linux" ]; then $(MAKE) install-linux; \
 	elif [ "$$(uname)" = "Darwin" ]; then $(MAKE) install-macos; \
 	else echo "Unsupported OS. Exiting."; exit 1; fi; \
-	pip install -r app/requirements.txt
+	python --version
+	which python
+	pip install -r requirements/base.txt
+	pip install -e .
 
 run:
 	@echo "Starting the local application server..."; \
@@ -94,7 +101,6 @@ run-docker-gpu:
 
 clean:
 	@echo "Cleaning project..."; \
-	rm -rf .venv; \
 	docker-compose down -v; \
 	$(MAKE) clean-cache
 
@@ -103,3 +109,12 @@ clean-cache:
 
 clear-cache:
 	python client/cli.py clear_cache
+
+python-version:
+	@python --version
+	@which python
+	$(MAKE) asd
+
+asd:
+	@python --version
+	@which python
