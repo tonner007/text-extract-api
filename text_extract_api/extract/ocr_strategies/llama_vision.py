@@ -1,7 +1,6 @@
 import os
 import tempfile
 import time
-from typing import Type
 
 import ollama
 
@@ -18,10 +17,16 @@ class LlamaVisionOCRStrategy(OCRStrategy):
         return "llama_vision"
 
     def extract_text(self, file_format: FileFormat):
-        if not file_format.can_convert_to(ImageFileFormat):
-            raise Exception(f"Llama Vision does not handle files of mime type: {file_format.mime_type}")
 
-        images = FileFormat.convert_to(file_format, ImageFileFormat);
+        if (
+                not isinstance(file_format, ImageFileFormat)
+                and not file_format.can_convert_to(ImageFileFormat)
+        ):
+            raise TypeError(
+                f"Llama Vision - format {file_format.mime_type} is not supported (yet?)"
+            )
+
+        images = FileFormat.convert_to(file_format, ImageFileFormat)
         extracted_text = ""
         start_time = time.time()
         ocr_percent_done = 0
@@ -34,10 +39,9 @@ class LlamaVisionOCRStrategy(OCRStrategy):
 
             # Generate text using the Llama 3.2 Vision model
             try:
-                print(temp_filename)
                 response = ollama.chat("llama3.2-vision", [{
                     'role': 'user',
-                    'content':  os.getenv('LLAMA_VISION_PROMPT', "You are OCR. Convert image to markdown."),
+                    'content': os.getenv('LLAMA_VISION_PROMPT', "You are OCR. Convert image to markdown."),
                     'images': [temp_filename]
                 }], stream=True)
                 os.remove(temp_filename)

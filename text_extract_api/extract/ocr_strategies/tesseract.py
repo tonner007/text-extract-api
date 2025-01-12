@@ -15,8 +15,11 @@ class TesseractOCRStrategy(OCRStrategy):
 
     def extract_text(self, file_format: FileFormat):
 
-        if file_format.convertible_to(ImageFileFormat):
-            raise Exception(f"TesseractOCRStrategy does not handle files of mime type: {file_format.mime_type}")
+        if (
+                not isinstance(file_format, ImageFileFormat)
+                and not file_format.can_convert_to(ImageFileFormat)
+        ):
+            raise Exception(f"Tesseract format {file_format.mime_type} is not supported (yet?)")
 
         images = FileFormat.convert_to(file_format, ImageFileFormat);
         extracted_text = ""
