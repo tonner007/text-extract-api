@@ -23,6 +23,5 @@ app.config_from_object({
     "worker_max_memory_per_child": 8200000
 })
 
-
 OCRStrategy.autodiscover_strategies()
 app.autodiscover_tasks(["text_extract_api.extract"], 'tasks', True)
