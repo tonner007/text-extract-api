@@ -1,21 +1,28 @@
+import pathlib
+import sys
+
 from celery import Celery
-import os
 from dotenv import load_dotenv
+
+from text_extract_api.extract.ocr_strategies.ocr_strategy import OCRStrategy
+
+sys.path.insert(0, str(pathlib.Path(__file__).parent.resolve()))
 
 load_dotenv(".env")
 
 import multiprocessing
+
 multiprocessing.set_start_method("spawn", force=True)
 
-def make_celery():
-    celery = Celery(
-        "app",
-        broker=os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0'),
-        backend=os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
-    )
-    celery.config_from_object({
-        "worker_max_memory_per_child": 8200000
-    })
-    return celery
+app = Celery(
+    "text_extract_api",
+    broker="redis://redis:6379/0",
+    backend="redis://redis:6379/0"
+)
+app.config_from_object({
+    "worker_max_memory_per_child": 8200000
+})
 
-celery = make_celery()
+
+OCRStrategy.autodiscover_strategies()
+app.autodiscover_tasks(["text_extract_api.extract"], 'tasks', True)
