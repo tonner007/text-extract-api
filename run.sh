@@ -1,6 +1,15 @@
 #!/bin/bash
 
+if [ "$DISABLE_VENV" -eq 1 ]; then
+    echo "  .venv disabled"
+else
+    echo "  .venv enabled"
+    python3 -m venv .venv
+    source .venv/bin/activate
+fi
+
 pip install -r requirements.txt
+pip install -e .
 
 if [ ! -f .env.localhost ]; then
   cp .env.localhost.example .env.localhost

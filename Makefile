@@ -1,5 +1,7 @@
 SHELL := /bin/bash
 
+export DISABLE_VENV ?= 0
+
 .PHONY: help
 help:
 	@echo "Available commands:"
@@ -33,7 +35,7 @@ install:
 setup-local:
 	@if [ ! -f .env ]; then \
 		printf  "\n\e[1;34m Copy .env.localhost to .env \e[0m"; \
-	  	cp .env.localhost .env; \
+	  	cp .env.localhost.example .env.localhost; \
 	fi
 	@while true; do \
 		printf  "\n\e[1;34m   Python setup environment...\e[0m"; \
@@ -74,10 +76,6 @@ install-requirements:
 	@if [ "$$(uname)" = "Linux" ]; then $(MAKE) install-linux; \
 	elif [ "$$(uname)" = "Darwin" ]; then $(MAKE) install-macos; \
 	else echo "Unsupported OS. Exiting."; exit 1; fi; \
-	python --version
-	which python
-	pip install -r requirements/base.txt
-	pip install -e .
 
 .PHONY: run
 run:

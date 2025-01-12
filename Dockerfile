@@ -22,7 +22,8 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
 COPY requirements.txt .
 
 # Install any needed packages specified in base.txt
-RUN pip install --no-cache-dir -r base.txt
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -e .
 
 # Copy the rest of the application code
 COPY client .

@@ -1,4 +1,3 @@
-from __future__ import annotations
 from typing import Iterator
 
 from pdf2image import convert_from_bytes

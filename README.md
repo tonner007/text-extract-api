@@ -50,12 +50,12 @@ To have it up and running please execute the following steps:
 [Download and install Ollama](https://ollama.com/download)
 [Download and install Docker](https://www.docker.com/products/docker-desktop/)
 
-If you are on Mac or just need to have your dependencies well organized, create a [virtual python env](https://docs.python.org/3/library/venv.html):
-
+Be default application create [virtual python env](https://docs.python.org/3/library/venv.html): `.venv`. You can disable this functionality by adding `DISABLE_VENV=1` before running script:
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-# now you've got access to `python` and `pip` commands
+DISABLE_VENV=1 make install 
+```
+```bash
+DISABLE_VENV=1 make run 
 ```
 
 Configure environment variables:

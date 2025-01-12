@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Type, Callable, Dict, Iterator
 
 from text_extract_api.files.file_formats.file_format import FileFormat

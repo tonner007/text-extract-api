@@ -17,7 +17,7 @@ class OCRStrategy:
 
     def extract_text_from_pdf(self, pdf_bytes):
         # Leave for backward compatibility
-        self.extract_text(PdfFileFormat.from_binary(pdf_bytes))
+        self.extract_text(PdfFileFormat.from_binary(pdf_bytes, None, None))
 
     """Base OCR Strategy Interface"""
 
