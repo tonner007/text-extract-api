@@ -27,7 +27,7 @@ echo "Pulling LLama3.2-vision model"
 ollama pull llama3.2-vision
 
 echo "Starting Redis"
-docker run  -p 6379:6379 --restart always --detach redis &
+docker run -p 6379:6379 --restart always --detach redis &
 
 echo "Your ENV settings loaded from .env.localhost file: "
 printenv

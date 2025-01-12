@@ -22,8 +22,8 @@ class PdfFileFormat(FileFormat):
     @staticmethod
     def convertible_to() -> Dict[Type["FileFormat"], Callable[[], Iterator["FileFormat"]]]:
         from text_extract_api.files.file_formats.image_file_format import ImageFileFormat
-        from text_extract_api.files.converters.pdf_to_jpeg import PdfToJpeg
+        from text_extract_api.files.converters.pdf_to_jpeg_converter import PdfToJpegConverter
 
         return {
-            ImageFileFormat: PdfToJpeg.convert
+            ImageFileFormat: PdfToJpegConverter.convert
         }

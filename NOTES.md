@@ -71,8 +71,11 @@ text-extract-api/
 
 ---
 
-### 2024-01-11 13:11 - requirements uspójniony 
+### Rrequirements uspójniony 
 - Po wstępnej weryfikacji nie ma w naszym przypadku sensu wydzielna requirementsów per te mały utilsy, szczególnie jeżeli są uruchamiane na .venv bo to trafia do tego samego miejsca z paczkami
 
-### 2024-01-11 - from maker models było zepsute w run.sh
+### From maker models było zepsute w run.sh
 - I naprawiłem, dłużej się ładuje, ale maker i tak za chwilę wylatuje z głównego repo i poza tym w następnych PR pójdzie refactor run
+
+### 
+- Storage nie powinien być na tym samym 
