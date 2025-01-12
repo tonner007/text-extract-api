@@ -1,24 +1,23 @@
 import pathlib
 import sys
 import time
-
-from text_extract_api.files.file_formats.file_format import FileFormat
-from text_extract_api.files.storage_manager import StorageManager
-
-#sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.resolve()))
-sys.path.insert(0, str(pathlib.Path(__file__).parent.resolve()))
-
-from fastapi import FastAPI, Form, UploadFile, File, HTTPException
-from celery.result import AsyncResult
-from celery_config import celery
-from tasks import ocr_task, OCR_STRATEGIES
 from hashlib import md5
 import redis
 import os
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException
+from celery.result import AsyncResult
 from pydantic import BaseModel, Field, field_validator
 import ollama
 import base64
 from typing import Optional
+
+from text_extract_api.files.file_formats.file_format import FileFormat
+from text_extract_api.files.storage_manager import StorageManager
+from text_extract_api.celery_init import make_celery
+from text_extract_api.extract.tasks import ocr_task, OCR_STRATEGIES
+
+# Define base path as text_extract_api - required for keeping absolute namespaces
+sys.path.insert(0, str(pathlib.Path(__file__).parent.resolve()))
 
 def storage_profile_exists(profile_name: str) -> bool:
     profile_path = os.path.abspath(os.path.join(os.getenv('STORAGE_PROFILE_PATH', '/storage_profiles'), f'{profile_name}.yaml'))
@@ -29,11 +28,10 @@ def storage_profile_exists(profile_name: str) -> bool:
     return True
 
 app = FastAPI()
-
+celery_app = make_celery()
 # Connect to Redis
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
-
 
 @app.post("/ocr")
 async def ocr_endpoint(
@@ -164,19 +162,16 @@ async def ocr_request_endpoint(request: OcrRequest):
     request_data = request.model_dump()
     try:
         OcrRequest(**request_data)
+        file = FileFormat.from_base64(request.file)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-    file = FileFormat.from_base64(request.file)
-    # Process the file content as needed
-    pdf_hash =
 
     print(
         f"Processing PDF with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}")
 
     # Asynchronous processing using Celery
     task = ocr_task.apply_async(
-        args=[file_content, request.strategy, "uploaded_file.png", pdf_hash, request.ocr_cache, request.prompt,
+        args=[file.binary, request.strategy, file.filename, file.hash, request.ocr_cache, request.prompt,
               request.model, request.storage_profile, request.storage_filename])
     return {"task_id": task.id}
 
@@ -186,7 +181,7 @@ async def ocr_status(task_id: str):
     """
     Endpoint to get the status of an OCR task using task_id.
     """
-    task = AsyncResult(task_id, app=celery)
+    task = AsyncResult(task_id, app=celery_app)
 
     if task.state == 'PENDING':
         return {"state": task.state, "status": "Task is pending..."}

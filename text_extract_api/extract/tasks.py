@@ -3,8 +3,7 @@ import time
 from typing import Optional
 import ollama
 import redis
-
-from text_extract_api.celery_config import celery
+from text_extract_api.celery_init import make_celery
 from text_extract_api.extract.ocr_strategies.marker import MarkerOCRStrategy
 from text_extract_api.extract.ocr_strategies.tesseract import TesseractOCRStrategy
 from text_extract_api.extract.ocr_strategies.llama_vision import LlamaVisionOCRStrategy
@@ -20,6 +19,7 @@ OCR_STRATEGIES = {
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
 
+celery = make_celery()
 
 @celery.task(bind=True)
 def ocr_task(

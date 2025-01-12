@@ -45,6 +45,6 @@ echo "Starting FastAPI server"
 if [ $APP_ENV = 'production' ]; then 
     uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000;
 else 
-    celery -A text_extract_api.tasks worker --loglevel=debug --pool=solo \
+    celery -A text_extract_api.celery_instance worker --loglevel=debug --pool=solo \
       & uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload;
 fi
