@@ -2,6 +2,7 @@ import pathlib
 import sys
 import time
 
+from text_extract_api.files.file_formats.file_format import FileFormat
 from text_extract_api.files.storage_manager import StorageManager
 
 #sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.resolve()))
@@ -166,10 +167,9 @@ async def ocr_request_endpoint(request: OcrRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    file_content = base64.b64decode(request.file)
-
+    file = FileFormat.from_base64(request.file)
     # Process the file content as needed
-    pdf_hash = md5(file_content).hexdigest()
+    pdf_hash =
 
     print(
         f"Processing PDF with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}")

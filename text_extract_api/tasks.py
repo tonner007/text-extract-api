@@ -1,12 +1,10 @@
 import os
 import time
 from typing import Optional
-
 import ollama
 import redis
 
 from text_extract_api.celery_config import celery
-
 from text_extract_api.extract.ocr_strategies.marker import MarkerOCRStrategy
 from text_extract_api.extract.ocr_strategies.tesseract import TesseractOCRStrategy
 from text_extract_api.extract.ocr_strategies.llama_vision import LlamaVisionOCRStrategy

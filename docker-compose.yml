@@ -34,7 +34,7 @@ services:
   celery_worker:
     build: text_extract_api
     container_name: celery_worker
-    command: celery -A main.celery worker --loglevel=info --pool=solo
+    command: celery -A text_extract_api.tasks worker --loglevel=info --pool=solo
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}

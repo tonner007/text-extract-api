@@ -28,9 +28,31 @@ class FileFormat:
         self._filename = filename
         self._mime_type = mime_type
 
+    @staticmethod
+    def from_base64(base64_string: str, filename: str = None, mime_type: str = None) -> Type["FileFormat"]:
+        try:
+            decoded_content = base64.b64decode(base64_string)
+        except (base64.binascii.Error, ValueError):
+            raise ValueError("Invalid Base64-encoded input.")
+        return FileFormat.from_binary(binary=decoded_content, filename=filename, mime_type=mime_type)
+
+    @staticmethod
+    def from_binary(binary: bytes, filename: Optional[str] = None, mime_type: Optional[str] = None) -> Type["FileFormat"]:
+        if mime_type is None:
+            mime_type = filetype.guess_mime_type(binary_data=binary, filename=filename)
+
+        file_format_class = FileFormat._get_file_format_class(mime_type)
+
+        if not filename:
+            filename = file_format_class.default_filename
+
+        return file_format_class(binary_file_content=binary_data, filename=filename, mime_type=mime_type)
+
     @property
     def to_base64(self) -> str:
         """Encodes the given file content to a Base64 string."""
+        if not self._base:
+            return ""
         return base64.b64encode(self._binary_file_content).decode('utf-8')
 
     @property
@@ -96,25 +118,9 @@ class FileFormat:
             raise ValueError(f"Cannot convert to {target_format}. Conversion not supported.")
         return converters[target_format]()
 
-    @staticmethod
-    def from_base64(base64_string: str, filename: str = None, mime_type: str = None) -> Type["FileFormat"]:
-        try:
-            decoded_content = base64.b64decode(base64_string)
-        except (base64.binascii.Error, ValueError):
-            raise ValueError("Invalid Base64-encoded input.")
-        return FileFormat.from_binary(binary=decoded_content, filename=filename, mime_type=mime_type)
+    def get_hash(self):
+        md5(self._binary_file_content).hexdigest()
 
-    @staticmethod
-    def from_binary(binary: bytes, filename: Optional[str] = None, mime_type: Optional[str] = None) -> Type["FileFormat"]:
-        if mime_type is None:
-            mime_type = filetype.guess_mime_type(binary_data=binary, filename=filename)
-
-        file_format_class = FileFormat.get_file_format_class(mime_type)
-
-        if not filename:
-            filename = file_format_class.default_filename
-
-        return file_format_class(binary_file_content=binary_data, filename=filename, mime_type=mime_type)
 
     @classmethod
     def get_format_info(cls) -> dict:
@@ -154,7 +160,7 @@ class FileFormat:
         return self
 
     @staticmethod
-    def get_file_format_class(mime_type: str) -> Type["FileFormat"]:
+    def _get_file_format_class(mime_type: str) -> Type["FileFormat"]:
         for subclass in FileFormat.__subclasses__():
             if mime_type in subclass.accepted_mime_types():
                 return subclass

@@ -113,3 +113,10 @@ clean:
 .PHONY: clean-python-cache
 clean-cache:
 	find . -type d -name '__pycache__' -exec rm -rf {} + && find . -type f -name '*.pyc' -delete
+
+.PHONY: celery
+celery:
+	@./script/celery.sh $(filter-out $@,$(MAKECMDGOALS)) $(MAKEFLAGS)
+
+%:
+	@:

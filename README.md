@@ -84,7 +84,7 @@ python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --pr
 To have multiple tasks runing at once - for concurrent processing please run the following command to start single worker process:
 
 ```bash
-celery -A main.celery worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
+celery -A text_extract_api.tasks worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
 ```
 
 ## Online demo
