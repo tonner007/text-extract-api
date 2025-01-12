@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DISABLE_VENV="${DISABLE_VENV:-0}"
+
 if [ "$DISABLE_VENV" -eq 1 ]; then
     echo "  .venv disabled"
 else
@@ -33,14 +35,16 @@ echo "Your ENV settings loaded from .env.localhost file: "
 printenv
 
 echo "Downloading models"
-python -c 'from marker.models import load_all_models; load_all_models()'
+#python -c 'from marker.models import load_all_models; load_all_models()'
 
 echo "Starting Celery worker"
-celery -A text_extract_api.tasks worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
+
+#celery -A text_extract_api.tasks worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
 
 echo "Starting FastAPI server"
 if [ $APP_ENV = 'production' ]; then 
     uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000;
 else 
-    uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload;
+    celery -A text_extract_api.tasks worker --loglevel=debug --pool=solo \
+      & uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload;
 fi

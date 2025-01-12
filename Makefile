@@ -80,7 +80,7 @@ install-requirements:
 .PHONY: run
 run:
 	@echo "Starting the local application server..."; \
-	./run.sh
+	DISABLE_VENV=${DISABLE_VENV:-0} ./run.sh
 
 .PHONY: setup-docker
 setup-docker:
@@ -113,10 +113,4 @@ clean:
 .PHONY: clean-python-cache
 clean-cache:
 	find . -type d -name '__pycache__' -exec rm -rf {} + && find . -type f -name '*.pyc' -delete
-
-.PHONY: celery
-celery:
-	@./script/celery.sh $(filter-out $@,$(MAKECMDGOALS)) $(MAKEFLAGS)
-
-%:
-	@:
+:
