@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 from hashlib import md5
-from typing import Type, Iterator, Optional, Dict, Callable, Union, TypeVar
+from typing import Type, Iterator, Optional, Dict, Callable, Union, TypeVar, List
 
 from text_extract_api.files.utils import filetype
 
@@ -104,19 +104,19 @@ class FileFormat:
         """
         raise NotImplementedError("Subclasses must implement is_pageable.")
 
-    def can_convert_to(self, target_format: Type["FileFormat"]) -> bool:
+    def can_convert_to(self, target_format: FileFormat) -> bool:
         convertible_keys = self.convertible_to().keys()
         return any(target_format is key for key in convertible_keys)
 
-    def convert_to(self, target_format: Type["FileFormat"]) -> Iterator["FileFormat"]:
+    def convert_to(self, target_format: FileFormat) -> List["FileFormat"]:
         if isinstance(self, target_format):
-            yield self
-        # @todo check if this compare is ok
+            return [self];
+
         converters = self.convertible_to()
         if target_format not in converters:
             raise ValueError(f"Cannot convert to {target_format}. Conversion not supported.")
 
-        return converters[target_format](self)
+        return list(converters[target_format](self))
 
     @staticmethod
     def convertible_to() -> Dict[Type["FileFormat"], Callable[[Type["FileFormat"]], Iterator[Type["Converter"]]]]:
@@ -155,6 +155,8 @@ class FileFormat:
 
     @staticmethod
     def _get_file_format_class(mime_type: str) -> Type["FileFormat"]:
+        import text_extract_api.files.file_formats.pdf_file_format # noqa - its not unused import @todo autodiscover
+        import text_extract_api.files.file_formats.image_file_format # noqa - its not unused import @todo autodiscover
         for subclass in FileFormat.__subclasses__():
             if mime_type in subclass.accepted_mime_types():
                 return subclass

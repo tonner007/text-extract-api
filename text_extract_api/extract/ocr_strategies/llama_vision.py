@@ -1,37 +1,43 @@
 import os
-import time
 import tempfile
+import time
+from typing import Type
+
 import ollama
 
-from text_extract_api.files.file_formats.image_file_format import ImageFileFormat
-from text_extract_api.files.file_formats.file_format import FileFormat
 from text_extract_api.extract.ocr_strategies.ocr_strategy import OCRStrategy
+from text_extract_api.files.file_formats.file_format import FileFormat
+from text_extract_api.files.file_formats.image_file_format import ImageFileFormat
 
 
 class LlamaVisionOCRStrategy(OCRStrategy):
     """Llama 3.2 Vision OCR Strategy"""
 
+    @classmethod
+    def name(cls) -> str:
+        return "llama_vision"
+
     def extract_text(self, file_format: FileFormat):
-        # Convert files to images
         if not file_format.can_convert_to(ImageFileFormat):
             raise Exception(f"Llama Vision does not handle files of mime type: {file_format.mime_type}")
 
-        images = list(FileFormat.convert_to(file_format, ImageFileFormat));
+        images = FileFormat.convert_to(file_format, ImageFileFormat);
         extracted_text = ""
         start_time = time.time()
         ocr_percent_done = 0
         num_pages = len(images)
         for i, image in enumerate(images):
 
-            temp_filename = None
             with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as temp_file:
-                image.save(temp_file, format="JPEG") # @todo !!!
+                temp_file.write(image.binary)
                 temp_filename = temp_file.name
 
             # Generate text using the Llama 3.2 Vision model
             try:
+                print(temp_filename)
                 response = ollama.chat("llama3.2-vision", [{
-                    'content': os.getenv('LLAMA_VISION_PROMPT', "You are OCR. Convert image to markdown."),
+                    'role': 'user',
+                    'content':  os.getenv('LLAMA_VISION_PROMPT', "You are OCR. Convert image to markdown."),
                     'images': [temp_filename]
                 }], stream=True)
                 os.remove(temp_filename)
@@ -40,11 +46,11 @@ class LlamaVisionOCRStrategy(OCRStrategy):
                     meta = {
                         'progress': str(30 + ocr_percent_done),
                         'status': 'OCR Processing'
-                                 + '(page ' + str(i + 1) + ' of ' + str(num_pages) + ')'
-                                + ' chunk no: ' + str(num_chunk),
-                       'start_time': start_time,
-                       'elapsed_time': time.time() - start_time}
-                    self.update_state_callback(state='PROGRESS', )
+                                  + '(page ' + str(i + 1) + ' of ' + str(num_pages) + ')'
+                                  + ' chunk no: ' + str(num_chunk),
+                        'start_time': start_time,
+                        'elapsed_time': time.time() - start_time}
+                    self.update_state_callback(state='PROGRESS', meta=meta)
                     num_chunk += 1
                     extracted_text += chunk['message']['content']
 
@@ -55,7 +61,5 @@ class LlamaVisionOCRStrategy(OCRStrategy):
                 raise Exception("Failed to generate text with Llama 3.2 Vision model")
 
             print(response)
-            # page_text = response.get("response", "")
-            # extracted_text += f"--- Page {i + 1} ---\n{page_text}\n"
 
         return extracted_text

@@ -14,7 +14,8 @@ from typing import Optional
 from text_extract_api.files.file_formats.file_format import FileFormat
 from text_extract_api.files.storage_manager import StorageManager
 from text_extract_api.celery_app import app as celery_app
-from text_extract_api.extract.tasks import ocr_task, OCR_STRATEGIES
+from text_extract_api.extract.tasks import ocr_task
+from text_extract_api.extract.ocr_strategies.ocr_strategy import OCRStrategy
 
 # Define base path as text_extract_api - required for keeping absolute namespaces
 sys.path.insert(0, str(pathlib.Path(__file__).parent.resolve()))
@@ -53,20 +54,15 @@ async def ocr_endpoint(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    if file.content_type is not None and file.content_type != 'application/pdf':
-        raise HTTPException(status_code=400, detail="Invalid file type. Only PDFs are supported.")
-
-    pdf_bytes = await file.read()
-
-    # Generate a hash of the document content for caching
-    pdf_hash = md5(pdf_bytes).hexdigest()
+    file_binary = await file.read()
+    file_format = FileFormat.from_binary(file_binary)
 
     print(
-        f"Processing Document {file.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}")
+        f"Processing Document {file_format.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}")
 
     # Asynchronous processing using Celery
     task = ocr_task.apply_async(
-        args=[pdf_bytes, strategy, file.filename, pdf_hash, ocr_cache, prompt, model, storage_profile,
+        args=[file_format.binary, strategy, file_format.filename, file_format.hash, ocr_cache, prompt, model, storage_profile,
               storage_filename])
     return {"task_id": task.id}
 
@@ -109,8 +105,7 @@ class OcrRequest(BaseModel):
 
     @field_validator('strategy')
     def validate_strategy(cls, v):
-        if v not in OCR_STRATEGIES:
-            raise ValueError(f"Unknown strategy '{v}'. Available: marker, tesseract")
+        OCRStrategy.get_strategy(v)
         return v
 
     @field_validator('file')
@@ -140,8 +135,7 @@ class OcrFormRequest(BaseModel):
 
     @field_validator('strategy')
     def validate_strategy(cls, v):
-        if v not in OCR_STRATEGIES:
-            raise ValueError(f"Unknown strategy '{v}'. Available: marker, tesseract")
+        OCRStrategy.get_strategy(v)
         return v
 
     @field_validator('storage_profile')
@@ -166,7 +160,7 @@ async def ocr_request_endpoint(request: OcrRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
     print(
-        f"Processing PDF with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}")
+        f"Processing {file.mime_type} with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}")
 
     # Asynchronous processing using Celery
     task = ocr_task.apply_async(

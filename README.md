@@ -98,7 +98,7 @@ Open in the browser: <a href="https://demo.doctractor.com/">demo.doctractor.com<
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r text_extract_api/requirements/base.txt
+pip install -r requirements.txt
 export OCR_UPLOAD_URL=https://doctractor:Aekie2ao@api.doctractor.com/ocr/upload
 export RESULT_URL=https://doctractor:Aekie2ao@api.doctractor.com/ocr/result/
 
@@ -144,7 +144,7 @@ cp .env.example.localhost .env
 Then modify the variables inside the file:
 
 ```bash
-#APP_ENV=production # sets the text_extract_api into prod mode, othervise dev mode with auto-reload on code changes
+#APP_ENV=production # sets the app into prod mode, otherwise dev mode with auto-reload on code changes
 REDIS_CACHE_URL=redis://localhost:6379/1
 STORAGE_PROFILE_PATH=/storage_profiles
 LLAMA_VISION_PROMPT="You are OCR. Convert image to markdown."
@@ -202,7 +202,7 @@ If the on-prem is too much hassle [ask us about the hosted/cloud edition](mailto
 python3 -m venv .venv
 source .venv/bin/activate
 # now you've got access to `python` and `pip` within your virutal env.
-pip install -r text_extract_api/requirements/base.txt # install main project requirements
+pip install -r requirements.txt # install main project requirements
 ```
 
 
@@ -210,7 +210,7 @@ The project includes a CLI for interacting with the API. To make it work first r
 
 ```bash
 cd client
-pip install -r base.txt
+pip install -r requirements.txt
 ```
 
 

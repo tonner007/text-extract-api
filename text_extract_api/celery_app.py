@@ -1,9 +1,10 @@
-import os
 import pathlib
 import sys
 
 from celery import Celery
 from dotenv import load_dotenv
+
+from text_extract_api.extract.ocr_strategies.ocr_strategy import OCRStrategy
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.resolve()))
 
@@ -22,4 +23,6 @@ app.config_from_object({
     "worker_max_memory_per_child": 8200000
 })
 
+
+OCRStrategy.autodiscover_strategies()
 app.autodiscover_tasks(["text_extract_api.extract"], 'tasks', True)
