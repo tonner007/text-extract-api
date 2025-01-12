@@ -13,7 +13,7 @@ from typing import Optional
 
 from text_extract_api.files.file_formats.file_format import FileFormat
 from text_extract_api.files.storage_manager import StorageManager
-from text_extract_api.celery_init import make_celery
+from text_extract_api.celery_app import app as celery_app
 from text_extract_api.extract.tasks import ocr_task, OCR_STRATEGIES
 
 # Define base path as text_extract_api - required for keeping absolute namespaces
@@ -28,7 +28,6 @@ def storage_profile_exists(profile_name: str) -> bool:
     return True
 
 app = FastAPI()
-celery_app = make_celery()
 # Connect to Redis
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)

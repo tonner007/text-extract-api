@@ -1,12 +1,14 @@
 import os
 import time
 from typing import Optional
+
 import ollama
 import redis
-from text_extract_api.celery_init import make_celery
+
+from text_extract_api.celery_app import app as celery_app
+from text_extract_api.extract.ocr_strategies.llama_vision import LlamaVisionOCRStrategy
 from text_extract_api.extract.ocr_strategies.marker import MarkerOCRStrategy
 from text_extract_api.extract.ocr_strategies.tesseract import TesseractOCRStrategy
-from text_extract_api.extract.ocr_strategies.llama_vision import LlamaVisionOCRStrategy
 from text_extract_api.files.storage_manager import StorageManager
 
 OCR_STRATEGIES = {
@@ -19,9 +21,8 @@ OCR_STRATEGIES = {
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
 
-celery = make_celery()
 
-@celery.task(bind=True)
+@celery_app.task(bind=True)
 def ocr_task(
         self,
         byes: bytes,
@@ -64,7 +65,7 @@ def ocr_task(
     else:
         print("Using cached result...")
 
-    print("Extracted text: " + extracted_text)
+    print("After extracted text")
     self.update_state(state='PROGRESS',
                       meta={'progress': 50, 'status': 'Text extracted', 'extracted_text': extracted_text,
                             'start_time': start_time,

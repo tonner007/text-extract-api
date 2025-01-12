@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import base64
 from hashlib import md5
 from typing import Type, Iterator, Optional, Dict, Callable, Union, TypeVar
+
 from text_extract_api.files.utils import filetype
 
 T = TypeVar("T", bound="FileFormat")
@@ -32,7 +35,7 @@ class FileFormat:
         return instance
 
     @classmethod
-    def from_binary(cls, binary: bytes, filename: Optional[str] = None, mime_type: Optional[str] = None) -> "FileFormat":
+    def from_binary(cls, binary: bytes, filename: Optional[str] = None, mime_type: Optional[str] = None) -> Type["FileFormat"]:
         mime_type = mime_type or filetype.guess_mime_type(binary_data=binary, filename=filename)
         file_format_class = cls._get_file_format_class(mime_type)
         return file_format_class(binary_file_content=binary, filename=filename, mime_type=mime_type)
@@ -101,17 +104,22 @@ class FileFormat:
         """
         raise NotImplementedError("Subclasses must implement is_pageable.")
 
-    def convert_to(self, target_format: Type[T]) -> Iterator[T]:
-        # @todo check if this compare is ok
+    def can_convert_to(self, target_format: Type["FileFormat"]) -> bool:
+        convertible_keys = self.convertible_to().keys()
+        return any(target_format is key for key in convertible_keys)
+
+    def convert_to(self, target_format: Type["FileFormat"]) -> Iterator["FileFormat"]:
         if isinstance(self, target_format):
             yield self
+        # @todo check if this compare is ok
         converters = self.convertible_to()
         if target_format not in converters:
             raise ValueError(f"Cannot convert to {target_format}. Conversion not supported.")
-        return converters[target_format]()
+
+        return converters[target_format](self)
 
     @staticmethod
-    def convertible_to() -> Dict[Type["FileFormat"], Callable[[], Iterator["FileFormat"]]]:
+    def convertible_to() -> Dict[Type["FileFormat"], Callable[[Type["FileFormat"]], Iterator[Type["Converter"]]]]:
         """
         Defines what formats this file type can be converted to.
         Returns a dictionary where keys are target formats and values are functions

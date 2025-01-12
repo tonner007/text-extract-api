@@ -39,12 +39,15 @@ echo "Downloading models"
 
 echo "Starting Celery worker"
 
-#celery -A text_extract_api.tasks worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
 
 echo "Starting FastAPI server"
-if [ $APP_ENV = 'production' ]; then 
+if [ $APP_ENV = 'production' ]; then
+    celery -A text_extract_api.celery_init worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
     uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000;
-else 
-    celery -A text_extract_api.celery_instance worker --loglevel=debug --pool=solo \
-      & uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload;
+else
+  (
+      trap 'kill 0' SIGINT;
+      celery -A text_extract_api.celery_app worker --loglevel=debug --pool=solo &
+      uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload
+  )
 fi

@@ -13,7 +13,7 @@ class LlamaVisionOCRStrategy(OCRStrategy):
 
     def extract_text(self, file_format: FileFormat):
         # Convert files to images
-        if file_format.convertable_to(ImageFileFormat):
+        if not file_format.can_convert_to(ImageFileFormat):
             raise Exception(f"Llama Vision does not handle files of mime type: {file_format.mime_type}")
 
         images = list(FileFormat.convert_to(file_format, ImageFileFormat));
