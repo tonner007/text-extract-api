@@ -26,5 +26,5 @@ class ImageFileFormat(FileFormat):
 
     def unify(self) -> "FileFormat":
         from text_extract_api.files.utils.image_processor import ImageProcessor
-        unified_image = ImageProcessor.unify_image(self.to_binary, ImageSupportedExportFormats.JPEG)
+        unified_image = ImageProcessor.unify_image(self.binary, ImageSupportedExportFormats.JPEG)
         return ImageFileFormat.from_binary(unified_image, self.filename, self.mime_type)

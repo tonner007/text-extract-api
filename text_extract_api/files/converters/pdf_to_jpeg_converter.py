@@ -10,7 +10,7 @@ class PdfToJpegConverter(Converter):
 
     @staticmethod
     def convert(file_format: PdfFileFormat) -> Iterator[ImageFileFormat]:
-        pages = convert_from_bytes(file_format.to_binary)
+        pages = convert_from_bytes(file_format.binary)
         for i, page in enumerate(pages, start=1):
             yield ImageFileFormat.from_binary(
                 binary=PdfToJpegConverter._image_to_bytes(page),
