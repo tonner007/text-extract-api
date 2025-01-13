@@ -21,7 +21,8 @@ def discover_strategies() -> Dict[str, Type]:
                     if ".ocr_strategies." in submodule_info.name:
                         try:
                             ocr_module = importlib.import_module(submodule_info.name)
-                        except ImportError:
+                        except ImportError as e:
+                            print('Error loading strategy ' + submodule_info.name + ': ' + str(e))
                             continue
                         for attr_name in dir(ocr_module):
                             attr = getattr(ocr_module, attr_name)
