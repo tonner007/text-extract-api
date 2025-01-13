@@ -14,7 +14,7 @@ google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
 transformers==4.45.2
-#surya-ocr==0.4.14
+surya-ocr==0.4.14
 marker-pdf==0.2.6
 boto3
 Pillow
