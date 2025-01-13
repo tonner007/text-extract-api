@@ -113,6 +113,8 @@ python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --pr
 
 ## Getting started with Docker
 
+Note: you can use the `make install` and `make run` command to setup the Docker environment for `text-extract-api`. You can find the manual steps required to do so described below.
+
 ### Prerequisites
 
 - Docker
