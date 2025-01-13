@@ -54,6 +54,9 @@ echo "Starting Redis"
 echo "Your ENV settings loaded from .env.localhost file: "
 printenv
 
+echo "Downloading models"
+python -c 'from marker.models import load_all_models; load_all_models()'
+
 CELERY_BIN="$(pwd)/.venv/bin/celery"
 CELERY_PID=$(pgrep -f "$CELERY_BIN")
 REDIS_PORT=6379 # will move it to .envs in near future
