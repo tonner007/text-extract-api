@@ -20,16 +20,16 @@ class FileFormat:
     def __init__(self, binary_file_content: bytes, filename: Optional[str] = None, mime_type: Optional[str] = None) -> None:
         """
         Attributes:
-            _binary_file_content (bytes): The binary content of the file.
-            _filename (str): The name of the file. Defaults to a predefined
+            binary_file_content (bytes): The binary content of the file.
+            filename (str): The name of the file. Defaults to a predefined
                 value if not provided.
-            _mime_type (str): The MIME type of the file. Defaults to a
+            mime_type (str): The MIME type of the file. Defaults to a
                 predefined value if not provided.
 
         Parameters:
-            _binary_file_content: The binary content of the file.
-            _filename: The name of the file. Defaults to None.
-            _mime_type: The MIME type. Defaults to None.
+            binary_file_content: The binary content of the file.
+            filename: The name of the file. Defaults to None.
+            mime_type: The MIME type. Defaults to None.
 
         Raises:
             ValueError: If binary_file_content is empty or if no MIME type
@@ -64,7 +64,7 @@ class FileFormat:
         mime_type = mime_type or FileFormat._guess_mime_type(binary_data=binary, filename=filename)
         from text_extract_api.files.file_formats.pdf_file_format import PdfFileFormat # type: ignore
         file_format_class = cls._get_file_format_class(mime_type)
-        return file_format_class(_binary_file_content=binary, _filename=filename, _mime_type=mime_type)
+        return file_format_class(binary_file_content=binary, filename=filename, mime_type=mime_type)
 
     def __repr__(self) -> str:
         """
@@ -79,8 +79,13 @@ class FileFormat:
         """
         Converts the FileFormat instance to a dictionary.
 
-        :param encode_base64: If True, includes Base64-encoded content; otherwise includes binary content.
-        :return: A dictionary containing the file's details, including either Base64 or binary content.
+        Args:
+            encode_base64 (bool): If True, includes Base64-encoded content;
+                otherwise includes binary content.
+
+        Returns:
+            FileFormatDict: A dictionary containing the file's details,
+                including either Base64 or binary content.
         """
         return {
             "filename": self.filename,
@@ -98,7 +103,6 @@ class FileFormat:
 
     @property
     def hash(self) -> str:
-        print(self.binary)
         return md5(self.binary).hexdigest()
 
     @property
