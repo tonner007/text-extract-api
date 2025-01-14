@@ -31,6 +31,7 @@ services:
       dockerfile: dev.Dockerfile
     entrypoint: /app/scripts/entrypoint.sh
     environment:
+      - APP_TYPE=celery
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND-redis://redis:6379/0}
