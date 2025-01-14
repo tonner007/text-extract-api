@@ -50,7 +50,7 @@ To have it up and running please execute the following steps:
 [Download and install Ollama](https://ollama.com/download)
 [Download and install Docker](https://www.docker.com/products/docker-desktop/)
 
-Be default application create [virtual python env](https://docs.python.org/3/library/venv.html): `.venv`. You can disable this functionality by adding `DISABLE_VENV=1` before running script:
+Be default application create [virtual python env](https://docs.python.org/3/library/venv.html): `.venv`. You can disable this functionality on local setup by adding `DISABLE_VENV=1` before running script:
 ```bash
 DISABLE_VENV=1 make install 
 ```

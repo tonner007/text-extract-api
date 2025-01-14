@@ -66,6 +66,6 @@ python_files = ["test_*.py"]
 max-line-length = 88
 exclude = ["venv", "__pycache__", ".git", ".mypy_cache"]
 
-[tool.setuptools]
-packages = ["text_extract_api"]
-py-modules = ["__init__"]
+[tool.setuptools.packages.find]
+where = ["text_extract_api"]
+include = ["text_extract_api.*"]
