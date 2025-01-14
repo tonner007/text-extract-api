@@ -11,7 +11,7 @@ from fastapi import FastAPI, Form, UploadFile, File, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
 from text_extract_api.celery_app import app as celery_app
-from text_extract_api.extract.ocr_strategies.ocr_strategy import OCRStrategy
+from text_extract_api.extract.strategies.strategy import Strategy
 from text_extract_api.extract.tasks import ocr_task
 from text_extract_api.files.file_formats.file_format import FileFormat, FileField
 from text_extract_api.files.storage_manager import StorageManager
@@ -109,7 +109,7 @@ class OcrRequest(BaseModel):
 
     @field_validator('strategy')
     def validate_strategy(cls, v):
-        OCRStrategy.get_strategy(v)
+        Strategy.get_strategy(v)
         return v
 
     @field_validator('storage_profile')
@@ -129,7 +129,7 @@ class OcrFormRequest(BaseModel):
 
     @field_validator('strategy')
     def validate_strategy(cls, v):
-        OCRStrategy.get_strategy(v)
+        Strategy.get_strategy(v)
         return v
 
     @field_validator('storage_profile')

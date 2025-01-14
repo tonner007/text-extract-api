@@ -1,7 +1,0 @@
-ocr_strategies:
-   llama_vision:
-      class: text_extract_api.extract.ocr_strategies.llama_vision.LlamaVisionOCRStrategy
-   marker:
-      class: text_extract_api.extract.ocr_strategies.marker.MarkerOCRStrategy
-   tesseract:
-      class: text_extract_api.extract.ocr_strategies.tesseract.TesseractOCRStrategy

@@ -3,7 +3,6 @@ SHELL := /bin/bash
 export DISABLE_VENV ?= 0
 export DISABLE_LOCAL_OLLAMA ?= 0
 
-
 .PHONY: help
 help:
 	@echo "Available commands:"

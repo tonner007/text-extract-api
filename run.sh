@@ -35,7 +35,7 @@ set -a; source .env.localhost; set +a
 
 if [ "$DISABLE_LOCAL_OLLAMA" -eq 1 ]; then
   echo "Local Ollama disabled by env \`DISABLE_LOCAL_OLLAMA=$DISABLE_LOCAL_OLLAMA\`"
-  echo "External Ollama should be listening on OLLAMA_HOST={$OLLAMA_HOST}"
+  echo "External Ollama should be listening on OLLAMA_HOST=$OLLAMA_HOST"
 else
   echo "Starting Ollama Server"
   ollama serve &

@@ -9,8 +9,8 @@ from pydantic.v1.typing import get_class
 
 from text_extract_api.files.file_formats.file_format import FileFormat
 
-class OCRStrategy:
-    _strategies: Dict[str, OCRStrategy] = {}
+class Strategy:
+    _strategies: Dict[str, Strategy] = {}
 
     def __init__(self):
         self.update_state_callback = None
@@ -31,7 +31,7 @@ class OCRStrategy:
         raise NotImplementedError("Strategy subclasses must implement extract_text method")
 
     @classmethod
-    def get_strategy(cls, name: str) -> Type["OCRStrategy"]:
+    def get_strategy(cls, name: str) -> Type["Strategy"]:
         """
         Fetches and returns a registered strategy class based on the given name.
 
@@ -58,13 +58,13 @@ class OCRStrategy:
         return cls._strategies[name]
 
     @classmethod
-    def register_strategy(cls, strategy: Type["OCRStrategy"], name: str = None, override: bool = False):
+    def register_strategy(cls, strategy: Type["Strategy"], name: str = None, override: bool = False):
         name = name or strategy.name()
         if override or name not in cls._strategies:
             cls._strategies[name] = strategy
 
     @classmethod
-    def load_strategies_from_config(cls, path: str = os.getenv('OCR_CONFIG_PATH', 'config/ocr_strategies.yaml')):
+    def load_strategies_from_config(cls, path: str = os.getenv('OCR_CONFIG_PATH', 'config/strategies.yaml')):
         strategies = cls._strategies
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(path)))
         config_file_path = os.path.join(project_root, path)
@@ -75,10 +75,10 @@ class OCRStrategy:
         with open(config_file_path, 'r') as f:
             config = yaml.safe_load(f)
 
-        if 'ocr_strategies' not in config or not isinstance(config['ocr_strategies'], dict):
-            raise ValueError(f"Missing or invalid 'ocr_strategies' section in the {config_file_path} file")
+        if 'strategies' not in config or not isinstance(config['strategies'], dict):
+            raise ValueError(f"Missing or invalid 'strategies' section in the {config_file_path} file")
 
-        for strategy_name, strategy_config in config['ocr_strategies'].items():
+        for strategy_name, strategy_config in config['strategies'].items():
             if 'class' not in strategy_config:
                 raise ValueError(f"Missing 'class' attribute for OCR strategy: {strategy_name}")
 
@@ -109,7 +109,7 @@ class OCRStrategy:
                 continue
 
             for submodule_info in pkgutil.walk_packages(module.__path__, module_info.name + "."):
-                if ".ocr_strategies." not in submodule_info.name:
+                if ".strategies." not in submodule_info.name:
                     continue
 
                 try:
@@ -120,8 +120,8 @@ class OCRStrategy:
                 for attr_name in dir(ocr_module):
                     attr = getattr(ocr_module, attr_name)
                     if (isinstance(attr, type)
-                            and issubclass(attr, OCRStrategy)
-                            and attr is not OCRStrategy
+                            and issubclass(attr, Strategy)
+                            and attr is not Strategy
                             and attr.name() not in strategies
                     ):
                         strategies[attr.name()] = attr()
