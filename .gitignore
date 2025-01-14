@@ -3,6 +3,7 @@ text_extract_api/__pycache__/*
 .env.local
 *.pyc
 .venv
+.dvenv
 .DS_Store
 storage/*
 client_secret*.json    
