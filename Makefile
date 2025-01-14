@@ -6,12 +6,12 @@ export DISABLE_OLLAMA ?= 0
 .PHONY: help
 help:
 	@echo "Available commands:"
-	@echo " make install (recommended)   - Automatic setup for local or Docker"
-	@echo " make run      - Start the local application server"
-	@echo " run-docker                  - Run Docker containers with CPU support"
-	@echo " run-docker-gpu              - Run Docker containers with GPU support"
-	@echo " clean                       - Clean the project environment"
-	@echo " clear-cache                 - Clear application cache"
+	@echo " make install (recommended)       - Automatic setup for local or Docker"
+	@echo " make run      					 - Start the local application server"
+	@echo " make run-docker                  - Run Docker containers with CPU support"
+	@echo " make run-docker-gpu              - Run Docker containers with GPU support"
+	@echo " make clean                       - Clean the project environment"
+	@echo " make clear-cache                 - Clear application cache"
 
 .PHONY: install
 install:
@@ -34,7 +34,7 @@ install:
 
 .PHONY: setup-local
 setup-local:
-	@[ -f .pyproject.hash ] && rm .pyproject.hash
+	@rm -f .pyproject.hash
 	@if [ ! -f .env ]; then \
 		printf  "\n\e[1;34m Copy .env.localhost.example to .env.localhost \e[0m"; \
 	  	cp .env.localhost.example .env.localhost; \
@@ -86,7 +86,7 @@ run:
 
 .PHONY: setup-docker
 setup-docker:
-	@[ -f .pyproject.hash ] && rm .pyproject.hash
+	@rm -f .pyproject.hash
 	@if [ ! -f .env ]; then \
 		printf  "\n\e[1;34m Copy .env.example to .env \e[0m"; \
 	  	cp .env.example .env; \
