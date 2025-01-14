@@ -4,7 +4,7 @@ from text_extract_api.files.file_formats.file_format import FileFormat
 
 
 class PdfFileFormat(FileFormat):
-    default_filename = 'pdf'
+    default_filename = 'default_filename.pdf'
 
     @staticmethod
     def accepted_mime_types() -> list[str]:
@@ -27,3 +27,8 @@ class PdfFileFormat(FileFormat):
         return {
             ImageFileFormat: PdfToJpegConverter.convert
         }
+
+    @staticmethod
+    def validate(binary_file_content: bytes):
+        if not binary_file_content.startswith(b'%PDF'):
+            raise ValueError("Corrupted PDF file")

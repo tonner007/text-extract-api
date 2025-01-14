@@ -98,7 +98,7 @@ class OcrRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
     prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
     model: str = Field(..., description="Model to use for the Ollama endpoint")
-    file: str = Field(..., description="Base64 encoded document file")
+    file: FileFormat = Field(..., description="Base64 encoded document file")
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
     storage_filename: Optional[str] = Field(None, description="Storage filename to use")
@@ -108,14 +108,22 @@ class OcrRequest(BaseModel):
         OCRStrategy.get_strategy(v)
         return v
 
-    @field_validator('file')
-    def validate_file(cls, v):
+    @field_validator('file', mode='before')
+    def validate_file(self, value: str) -> str:
         try:
-            file_content = base64.b64decode(v)
-            if not file_content.startswith(b'%PDF'):
-                raise ValueError("Invalid file type. Only PDFs are supported.")
-        except Exception:
-            return v  # @TODO tmp
+            FileFormat.from_base64(value)
+            return value
+        except ValueError as ve:
+            raise ve
+        except Exception as e:
+            raise ValueError(f"An unexpected error occurred while loading the file: {e}")
+
+    @field_validator('file', mode='before')
+    def validate_file(self, v):
+        FileFormat.from_base64(v)
+        file_content = base64.b64decode(v)
+        if not file_content.startswith(b'%PDF'):
+            raise ValueError("Inappropriate argument value (of correct type)")
         return v
 
     @field_validator('storage_profile')
