@@ -33,7 +33,7 @@ services:
   celery_worker:
     build:
       context: .  # Keep the build context as the root directory
-      dockerfile: Dockerfile.gpu # Specify the new path to the GPU Dockerfile
+      dockerfile: dev.gpu.Dockerfile # Specify the new path to the GPU Dockerfile
     entrypoint: /app/scripts/entrypoint.sh
     environment:
       - APP_TYPE=celery

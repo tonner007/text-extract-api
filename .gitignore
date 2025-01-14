@@ -10,3 +10,4 @@ client_secret*.json
 .idea
 # Python good practice ignore
 *.egg-info/
+/build/

@@ -26,7 +26,9 @@ services:
       - .:/app  # Mount the text_extract_api directory to enable auto-reloading
 
   celery_worker:
-    build: .
+    build:
+      context: . # Keep the build context as the root directory
+      dockerfile: dev.Dockerfile
     entrypoint: /app/scripts/entrypoint.sh
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}

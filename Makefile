@@ -34,6 +34,7 @@ install:
 
 .PHONY: setup-local
 setup-local:
+	@[ -f .pyproject.hash ] && rm .pyproject.hash
 	@if [ ! -f .env ]; then \
 		printf  "\n\e[1;34m Copy .env.localhost.example to .env.localhost \e[0m"; \
 	  	cp .env.localhost.example .env.localhost; \
@@ -85,6 +86,7 @@ run:
 
 .PHONY: setup-docker
 setup-docker:
+	@[ -f .pyproject.hash ] && rm .pyproject.hash
 	@if [ ! -f .env ]; then \
 		printf  "\n\e[1;34m Copy .env.example to .env \e[0m"; \
 	  	cp .env.example .env; \
@@ -107,7 +109,7 @@ run-docker:
 .PHONY: run-docker-gpu
 run-docker-gpu:
 	@echo -e "\033[1;34m   Starting Docker container with GPU support...\033[0m";
-	@docker-compose -f docker-compose.gpu.yml up --build
+	@docker-compose -f docker-compose.gpu.yml -p text-extract-api-gpu up --build
 
 .PHONY: clean
 clean:
@@ -118,4 +120,4 @@ clean:
 .PHONY: clean-python-cache
 clean-cache:
 	find . -type d -name '__pycache__' -exec rm -rf {} + && find . -type f -name '*.pyc' -delete
-:
+

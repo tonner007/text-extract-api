@@ -180,7 +180,7 @@ docker-compose up --build
 ... for GPU support run:
 
 ```bash
-docker-compose -f docker-compose.gpu.yml up --build
+docker-compose -f docker-compose.gpu.yml -p text-extract-api-gpu up --build
 ```
 
 **Note:** While on Mac - Docker does not support Apple GPUs. In this case you might want to run the application natively without the Docker Compose please check [how to run it natively with GPU support](#getting-started)
