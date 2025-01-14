@@ -23,6 +23,7 @@ RUN apt-get update && \
     apt-transport-https \
     software-properties-common \
     libreoffice \
+    libmagic1 \
     libmagic-dev \
     ffmpeg \
     git-lfs \

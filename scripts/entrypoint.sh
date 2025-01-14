@@ -8,7 +8,7 @@ if [ ! -d ".dvenv" ] || [ ! -f "$PYPROJECT_HASH_FILE" ] || [ "$(cat $PYPROJECT_H
   echo "Dependencies have changed or .dvenv is missing. Reinstalling..."
   python -m venv .dvenv
   source .dvenv/bin/activate
-  pip install --upgrade pip setuptools wheel
+  pip install --upgrade pip setuptools
   pip install .
   echo "$CURRENT_HASH" > "$PYPROJECT_HASH_FILE"
 else
@@ -18,7 +18,7 @@ fi
 
 source .dvenv/bin/activate
 
-if [ "$APP_MODE" = "celery" ]; then
+if [ "$APP_TYPE" = "celery" ]; then
   echo "Starting Celery worker..."
   exec celery -A text_extract_api.celery_app worker --loglevel=info --pool=solo
 else
