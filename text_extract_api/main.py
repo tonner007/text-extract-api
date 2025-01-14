@@ -11,7 +11,7 @@ import ollama
 import base64
 from typing import Optional
 
-from text_extract_api.files.file_formats.file_format import FileFormat
+from text_extract_api.files.file_formats.file_format import FileFormat, FileField
 from text_extract_api.files.storage_manager import StorageManager
 from text_extract_api.celery_app import app as celery_app
 from text_extract_api.extract.tasks import ocr_task
@@ -98,7 +98,7 @@ class OcrRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
     prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
     model: str = Field(..., description="Model to use for the Ollama endpoint")
-    file: FileFormat = Field(..., description="Base64 encoded document file")
+    file: FileField = Field(..., description="Base64 encoded document file")
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
     storage_filename: Optional[str] = Field(None, description="Storage filename to use")
@@ -109,7 +109,7 @@ class OcrRequest(BaseModel):
         return v
 
     @field_validator('file', mode='before')
-    def validate_file(self, value: str) -> str:
+    def validate_file(cls, value: str) -> str:
         try:
             FileFormat.from_base64(value)
             return value
@@ -117,14 +117,6 @@ class OcrRequest(BaseModel):
             raise ve
         except Exception as e:
             raise ValueError(f"An unexpected error occurred while loading the file: {e}")
-
-    @field_validator('file', mode='before')
-    def validate_file(self, v):
-        FileFormat.from_base64(v)
-        file_content = base64.b64decode(v)
-        if not file_content.startswith(b'%PDF'):
-            raise ValueError("Inappropriate argument value (of correct type)")
-        return v
 
     @field_validator('storage_profile')
     def validate_storage_profile(cls, v):
