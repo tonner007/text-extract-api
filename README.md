@@ -52,6 +52,24 @@ To have it up and running please execute the following steps:
 [Download and install Ollama](https://ollama.com/download)
 [Download and install Docker](https://www.docker.com/products/docker-desktop/)
 
+> ### Setting Up Ollama on a Remote Host
+> 
+> To connect to an external Ollama instance, set the environment variable: `OLLAMA_HOST=http://address:port`, e.g.:
+> ```bash
+> OLLAMA_HOST=http(s)://127.0.0.1:5000
+> ```
+> 
+> If you want to disable the local Ollama model, use env `DISABLE_LOCAL_OLLAMA=1`, e.g.
+> ```bash
+> DISABLE_LOCAL_OLLAMA=1 make install
+> ```
+> **Note**: When local Ollama is disabled, ensure the required model is downloaded on the external instance.  
+> 
+> Currently, the `DISABLE_LOCAL_OLLAMA` variable cannot be used to disable Ollama in Docker. As a workaround, remove the `ollama` service from `docker-compose.yml` or `docker-compose.gpu.yml`.  
+>
+> Support for using the variable in Docker environments will be added in a future release.
+
+
 ### Clone the Repository
 
 First, clone the repository and change current directory to it:
@@ -170,7 +188,7 @@ Then modify the variables inside the file:
 ```bash
 #APP_ENV=production # sets the app into prod mode, otherwise dev mode with auto-reload on code changes
 REDIS_CACHE_URL=redis://localhost:6379/1
-STORAGE_PROFILE_PATH=/storage_profiles
+STORAGE_PROFILE_PATH=./storage_profiles
 LLAMA_VISION_PROMPT="You are OCR. Convert image to markdown."
 
 # CLI settings
@@ -283,7 +301,7 @@ python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --pr
 ```
 
 The `ocr` command can store the results using the `storage_profiles`:
-  - **storage_profile**: Used to save the result - the `default` profile (`/storage_profiles/default.yaml`) is used by default; if empty file is not saved
+  - **storage_profile**: Used to save the result - the `default` profile (`./storage_profiles/default.yaml`) is used by default; if empty file is not saved
   - **storage_filename**: Outputting filename - relative path of the `root_path` set in the storage profile - by default a relative path to `/storage` folder; can use placeholders for dynamic formatting: `{file_name}`, `{file_extension}`, `{Y}`, `{mm}`, `{dd}` - for date formatting, `{HH}`, `{MM}`, `{SS}` - for time formatting
 
 
@@ -381,7 +399,7 @@ apiClient.uploadFile(formData).then(response => {
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result
   - **model**: When provided along with the prompt - this model will be used for LLM processing
-  - **storage_profile**: Used to save the result - the `default` profile (`/storage_profiles/default.yaml`) is used by default; if empty file is not saved
+  - **storage_profile**: Used to save the result - the `default` profile (`./storage_profiles/default.yaml`) is used by default; if empty file is not saved
   - **storage_filename**: Outputting filename - relative path of the `root_path` set in the storage profile - by default a relative path to `/storage` folder; can use placeholders for dynamic formatting: `{file_name}`, `{file_extension}`, `{Y}`, `{mm}`, `{dd}` - for date formatting, `{HH}`, `{MM}`, `{SS}` - for time formatting
 
 Example:

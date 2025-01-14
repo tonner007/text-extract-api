@@ -1,7 +1,9 @@
 #!/bin/bash
 
+echo "$DISABLE_LOCAL_OLLAMA"
+
 DISABLE_VENV="${DISABLE_VENV:-0}"
-DISABLE_OLLAMA="${DISABLE_OLLAMA:-0}"
+DISABLE_LOCAL_OLLAMA="${DISABLE_LOCAL_OLLAMA:-0}"
 
 RED='\033[0;31m'
 CYAN='\033[0;36m'
@@ -31,8 +33,9 @@ fi
 
 set -a; source .env.localhost; set +a
 
-if [ "$DISABLE_OLLAMA" -eq 1 ]; then
-  echo "Ollama disabled by DISABLE_OLLAMA"
+if [ "$DISABLE_LOCAL_OLLAMA" -eq 1 ]; then
+  echo "Local Ollama disabled by env \`DISABLE_LOCAL_OLLAMA=$DISABLE_LOCAL_OLLAMA\`"
+  echo "External Ollama should be listening on OLLAMA_HOST={$OLLAMA_HOST}"
 else
   echo "Starting Ollama Server"
   ollama serve &

@@ -1,7 +1,8 @@
 SHELL := /bin/bash
 
 export DISABLE_VENV ?= 0
-export DISABLE_OLLAMA ?= 0
+export DISABLE_LOCAL_OLLAMA ?= 0
+
 
 .PHONY: help
 help:
@@ -82,7 +83,7 @@ install-requirements:
 .PHONY: run
 run:
 	@echo "Starting the local application server..."; \
-	DISABLE_VENV=${DISABLE_VENV:-0} DISABLE_OLLAMA=${DISABLE_OLLAMA:-0} ./run.sh
+	DISABLE_VENV=$(DISABLE_VENV) DISABLE_LOCAL_OLLAMA=$(DISABLE_LOCAL_OLLAMA) ./run.sh
 
 .PHONY: setup-docker
 setup-docker:
