@@ -8,12 +8,12 @@ ollama
 uvicorn[standard]
 requests
 python-multipart
-pdftext==0.3.7
+pdftext
 argparse
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
-transformers==4.45.2
+transformers
 surya-ocr==0.4.14
 marker-pdf==0.2.6
 boto3
@@ -21,3 +21,11 @@ Pillow
 python-magic
 maker
 setuptools
+PyYAML
+botocore
+protobuf
+opencv-python
+numpy
+pydantic
+python-dotenv
+libmagic
