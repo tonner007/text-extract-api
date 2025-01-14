@@ -66,7 +66,7 @@ class FileFormat:
             mime_type: Optional[str] = None
     ) -> Type["FileFormat"]:
         mime_type = mime_type or FileFormat._guess_mime_type(binary_data=binary, filename=filename)
-        from text_extract_api.files.file_formats.pdf_file_format import PdfFileFormat  # type: ignore
+        from text_extract_api.files.file_formats.pdf import PdfFileFormat  # type: ignore
         file_format_class = cls._get_file_format_class(mime_type)
         print(file_format_class)
         return file_format_class(binary_file_content=binary, filename=filename, mime_type=mime_type)
@@ -204,8 +204,8 @@ class FileFormat:
 
     @staticmethod
     def _get_file_format_class(mime_type: str) -> Type["FileFormat"]:
-        import text_extract_api.files.file_formats.pdf_file_format  # noqa - its not unused import @todo autodiscover
-        import text_extract_api.files.file_formats.image_file_format  # noqa - its not unused import @todo autodiscover
+        import text_extract_api.files.file_formats.pdf  # noqa - its not unused import @todo autodiscover
+        import text_extract_api.files.file_formats.image  # noqa - its not unused import @todo autodiscover
         for subclass in FileFormat.__subclasses__():
             if mime_type in subclass.accepted_mime_types():
                 return subclass

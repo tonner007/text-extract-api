@@ -3,7 +3,7 @@ from marker.models import load_all_models
 
 from text_extract_api.extract.ocr_strategies.ocr_strategy import OCRStrategy
 from text_extract_api.files.file_formats.file_format import FileFormat
-from text_extract_api.files.file_formats.pdf_file_format import PdfFileFormat
+from text_extract_api.files.file_formats.pdf import PdfFileFormat
 
 
 class MarkerOCRStrategy(OCRStrategy):

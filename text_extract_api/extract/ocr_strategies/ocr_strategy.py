@@ -66,7 +66,7 @@ class OCRStrategy:
     @classmethod
     def load_strategies_from_config(cls, path: str = os.getenv('OCR_CONFIG_PATH', 'config/ocr_strategies.yaml')):
         strategies = cls._strategies
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(path)))  # Adjust depth if needed
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(path)))
         config_file_path = os.path.join(project_root, path)
 
         if not os.path.isfile(config_file_path):

@@ -6,7 +6,7 @@ import ollama
 
 from text_extract_api.extract.ocr_strategies.ocr_strategy import OCRStrategy
 from text_extract_api.files.file_formats.file_format import FileFormat
-from text_extract_api.files.file_formats.image_file_format import ImageFileFormat
+from text_extract_api.files.file_formats.image import ImageFileFormat
 
 
 class LlamaVisionOCRStrategy(OCRStrategy):
