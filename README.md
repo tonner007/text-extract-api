@@ -68,6 +68,7 @@ Be default application create [virtual python env](https://docs.python.org/3/lib
 ```bash
 DISABLE_VENV=1 make install 
 ```
+
 ```bash
 DISABLE_VENV=1 make run 
 ```
@@ -132,8 +133,6 @@ python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --pr
 
 ## Getting started with Docker
 
-Note: you can use the `make install` and `make run` command to setup the Docker environment for `text-extract-api`. You can find the manual steps required to do so described below.
-
 ### Prerequisites
 
 - Docker
@@ -146,7 +145,11 @@ git clone https://github.com/CatchTheTornado/text-extract-api.git
 cd text-extract-api
 ```
 
-### Setup environmental variables
+### Using `Makefile`
+You can use the `make install` and `make run` command to setup the Docker environment for `text-extract-api`. You can find the manual steps required to do so described below.
+
+
+### Manual setup
 
 Create `.env` file in the root directory and set the necessary environment variables. You can use the `.env.example` file as a template:
 

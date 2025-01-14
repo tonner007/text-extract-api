@@ -12,3 +12,4 @@ client_secret*.json
 # Python good practice ignore
 *.egg-info/
 /build/
+.pyproject.hash
