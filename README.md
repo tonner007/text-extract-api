@@ -45,18 +45,34 @@ Before running the example see [getting started](#getting-started)
 
 You might want to run the app directly on your machine for development purposes OR to use for example Apple GPUs (which are not supported by Docker at the moment).
 
+### Prerequisites
+
 To have it up and running please execute the following steps:
 
 [Download and install Ollama](https://ollama.com/download)
 [Download and install Docker](https://www.docker.com/products/docker-desktop/)
 
+### Clone the Repository
+
+First, clone the repository and change current directory to it:
+
+```sh
+git clone https://github.com/CatchTheTornado/text-extract-api.git
+cd text-extract-api
+```
+
+### Setup with `Makefile`
+
 Be default application create [virtual python env](https://docs.python.org/3/library/venv.html): `.venv`. You can disable this functionality on local setup by adding `DISABLE_VENV=1` before running script:
+
 ```bash
 DISABLE_VENV=1 make install 
 ```
 ```bash
 DISABLE_VENV=1 make run 
 ```
+
+### Manual setup
 
 Configure environment variables:
 
@@ -67,6 +83,9 @@ cp .env.localhost.example .env.localhost
 You might want to just use the defaults - should be fine. After ENV variables are set, just execute:
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
 chmod +x run.sh
 run.sh
 ```
@@ -212,7 +231,7 @@ The project includes a CLI for interacting with the API. To make it work first r
 
 ```bash
 cd client
-pip install -r requirements.txt
+pip install -e .
 ```
 
 
