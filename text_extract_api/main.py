@@ -22,7 +22,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent.resolve()))
 
 def storage_profile_exists(profile_name: str) -> bool:
     profile_path = os.path.abspath(
-        os.path.join(os.getenv('STORAGE_PROFILE_PATH', '/storage_profiles'), f'{profile_name}.yaml'))
+        os.path.join(os.getenv('STORAGE_PROFILE_PATH', './storage_profiles'), f'{profile_name}.yaml'))
     if not os.path.isfile(profile_path) and profile_path.startswith('..'):
         # backward compability for ../storage_manager in .env
         sub_profile_path = os.path.normpath(os.path.join('.', profile_path))
