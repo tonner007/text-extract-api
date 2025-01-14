@@ -5,6 +5,8 @@ ARG MAX_JOBS=4
 
 FROM nvidia/cuda:$CUDA_VERSION-cudnn$CUDNN_VERSION-devel-ubuntu$UBUNTU_VERSION
 
+RUN ln -s /storage /app/storage # backward compatibility for (https://github.com/CatchTheTornado/text-extract-api/issues/85)
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     wget \

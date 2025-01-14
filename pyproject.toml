@@ -31,7 +31,7 @@ dependencies = [
     "marker-pdf==0.2.6",
     "boto3",
     "Pillow",
-    "python-magic",
+    "python-magic==0.4.27",
     "libmagic",
     "maker",
     "setuptools",

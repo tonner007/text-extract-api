@@ -1,5 +1,7 @@
 FROM python:3.10-slim
 
+RUN ln -s /storage /app/storage # backward compability for (https://github.com/CatchTheTornado/text-extract-api/issues/85)
+
 RUN echo 'Acquire::http::Pipeline-Depth 0;\nAcquire::http::No-Cache true;\nAcquire::BrokenProxy true;\n' > /etc/apt/apt.conf.d/99fixbadproxy
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
