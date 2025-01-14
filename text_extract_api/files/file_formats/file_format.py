@@ -1,7 +1,9 @@
 import base64
 from hashlib import md5
 from typing import Type, Iterator, Optional, Dict, Callable, List, TypedDict
+
 import magic
+
 
 class FileFormatDict(TypedDict):
     filename: str
@@ -10,6 +12,7 @@ class FileFormatDict(TypedDict):
     content_base64: Optional[str]
     content_binary: Optional[bytes]
 
+
 class FileFormat:
     DEFAULT_FILENAME: str = "file"
     DEFAULT_MIME_TYPE: Optional[str] = None
@@ -17,7 +20,8 @@ class FileFormat:
 
     # Construction
 
-    def __init__(self, binary_file_content: bytes, filename: Optional[str] = None, mime_type: Optional[str] = None) -> None:
+    def __init__(self, binary_file_content: bytes, filename: Optional[str] = None,
+                 mime_type: Optional[str] = None) -> None:
         """
         Attributes:
             binary_file_content (bytes): The binary content of the file.
@@ -62,7 +66,7 @@ class FileFormat:
             mime_type: Optional[str] = None
     ) -> Type["FileFormat"]:
         mime_type = mime_type or FileFormat._guess_mime_type(binary_data=binary, filename=filename)
-        from text_extract_api.files.file_formats.pdf_file_format import PdfFileFormat # type: ignore
+        from text_extract_api.files.file_formats.pdf_file_format import PdfFileFormat  # type: ignore
         file_format_class = cls._get_file_format_class(mime_type)
         print(file_format_class)
         return file_format_class(binary_file_content=binary, filename=filename, mime_type=mime_type)
@@ -219,7 +223,6 @@ class FileFormat:
 
 class FileField:
     def __init__(self, value: str):
-        # Validate using FileFormat.from_base64
         self._file_format = FileFormat.from_base64(value)
         self.value = value
 
@@ -227,5 +230,4 @@ class FileField:
         return self.value
 
     def __get_pydantic_core_schema__(self, handler) -> str:
-        # Use a string schema and validate with FileFormat.from_base64
         return handler.generate_schema(str)
