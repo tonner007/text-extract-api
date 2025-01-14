@@ -11,6 +11,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
         tesseract-ocr \
         libtesseract-dev \
         poppler-utils \
+        libmagic-dev \
         libpoppler-cpp-dev \
     && rm -rf /var/lib/apt/lists/*
 

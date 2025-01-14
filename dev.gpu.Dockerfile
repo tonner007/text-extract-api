@@ -23,6 +23,7 @@ RUN apt-get update && \
     apt-transport-https \
     software-properties-common \
     libreoffice \
+    libmagic-dev \
     ffmpeg \
     git-lfs \
     xvfb \
