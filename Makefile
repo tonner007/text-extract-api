@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 export DISABLE_VENV ?= 0
+export DISABLE_OLLAMA ?= 0
 
 .PHONY: help
 help:
@@ -34,7 +35,7 @@ install:
 .PHONY: setup-local
 setup-local:
 	@if [ ! -f .env ]; then \
-		printf  "\n\e[1;34m Copy .env.localhost to .env \e[0m"; \
+		printf  "\n\e[1;34m Copy .env.localhost.example to .env.localhost \e[0m"; \
 	  	cp .env.localhost.example .env.localhost; \
 	fi
 	@while true; do \
@@ -80,10 +81,14 @@ install-requirements:
 .PHONY: run
 run:
 	@echo "Starting the local application server..."; \
-	DISABLE_VENV=${DISABLE_VENV:-0} ./run.sh
+	DISABLE_VENV=${DISABLE_VENV:-0} DISABLE_OLLAMA=${DISABLE_OLLAMA:-0} ./run.sh
 
 .PHONY: setup-docker
 setup-docker:
+	@if [ ! -f .env ]; then \
+		printf  "\n\e[1;34m Copy .env.example to .env \e[0m"; \
+	  	cp .env.example .env; \
+	fi
 	@echo -e "\033[1;34m   Available Docker options:\033[0m"; \
 	echo -e "\033[1;33m     1:\033[0m Run Docker containers with CPU support"; \
 	echo -e "\033[1;33m     2:\033[0m Run Docker containers with GPU support"; \
@@ -96,13 +101,13 @@ setup-docker:
 
 .PHONY: run-docker
 run-docker:
-	@echo -e "\033[1;34m   Starting Docker container with CPU support...\033[0m"; \
-	docker-compose up --build
+	@echo -e "\033[1;34m   Starting Docker container with CPU support...\033[0m";
+	@docker-compose -f docker-compose.yml up --build
 
 .PHONY: run-docker-gpu
 run-docker-gpu:
-	@echo -e "\033[1;34m   Starting Docker container with GPU support...\033[0m"; \
-	docker-compose -f docker-compose.gpu.yml up --build
+	@echo -e "\033[1;34m   Starting Docker container with GPU support...\033[0m";
+	@docker-compose -f docker-compose.gpu.yml up --build
 
 .PHONY: clean
 clean:

@@ -98,7 +98,7 @@ Open in the browser: <a href="https://demo.doctractor.com/">demo.doctractor.com<
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e .
 export OCR_UPLOAD_URL=https://doctractor:Aekie2ao@api.doctractor.com/ocr/upload
 export RESULT_URL=https://doctractor:Aekie2ao@api.doctractor.com/ocr/result/
 
@@ -204,7 +204,7 @@ If the on-prem is too much hassle [ask us about the hosted/cloud edition](mailto
 python3 -m venv .venv
 source .venv/bin/activate
 # now you've got access to `python` and `pip` within your virutal env.
-pip install -r requirements.txt # install main project requirements
+pip install -e . # install main project requirements
 ```
 
 
