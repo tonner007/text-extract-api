@@ -4,7 +4,7 @@ from text_extract_api.files.file_formats.file_format import FileFormat
 
 
 class PdfFileFormat(FileFormat):
-    default_filename = 'default_filename.pdf'
+    DEFAULT_FILENAME: str = "image.pdf"
 
     @staticmethod
     def accepted_mime_types() -> list[str]:

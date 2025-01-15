@@ -14,6 +14,7 @@ from text_extract_api.files.storage_manager import StorageManager
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
 
+
 @celery_app.task(bind=True)
 def ocr_task(
         self,
@@ -47,7 +48,6 @@ def ocr_task(
 
     if extracted_text is None:
         print("Extracting text from PDF...")
-        elapsed_time = time.time() - start_time
         self.update_state(state='PROGRESS',
                           meta={'progress': 30, 'status': 'Extracting text from PDF', 'start_time': start_time,
                                 'elapsed_time': time.time() - start_time})  # Example progress update
