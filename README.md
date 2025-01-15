@@ -149,6 +149,10 @@ python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --pr
 
 <img src="screenshots/demo.png" alt="Demo screenshot" />
 
+## Join us on Discord
+
+In case of any questions, help requests or just feedback - please [join us on Discord](https://discord.gg/NJzu47Ye3a)!
+
 ## Getting started with Docker
 
 ### Prerequisites
