@@ -1,9 +1,19 @@
 import os
+from enum import Enum
+
 import yaml
-from storage_strategies.local_filesystem import LocalFilesystemStorageStrategy
-from storage_strategies.google_drive import GoogleDriveStorageStrategy
-from storage_strategies.aws_s3 import AWSS3StorageStrategy
-from pathlib import Path
+
+from text_extract_api.files.storage_strategies.aws_s3 import AWSS3StorageStrategy
+from text_extract_api.files.storage_strategies.google_drive import GoogleDriveStorageStrategy
+from text_extract_api.files.storage_strategies.local_filesystem import LocalFilesystemStorageStrategy
+from text_extract_api.files.storage_strategies.storage_strategy import StorageStrategy
+
+
+class StorageStrategy(Enum):
+    LOCAL_FILESYSTEM = "local_filesystem"
+    GOOGLE_DRIVE = "google_drive"
+    AWS_S3 = "aws_s3"
+
 
 class StorageManager:
     def __init__(self, profile_name):
@@ -11,12 +21,12 @@ class StorageManager:
         with open(profile_path, 'r') as file:
             self.profile = yaml.safe_load(file)
 
-        strategy = self.profile['strategy']
-        if strategy == 'local_filesystem':
+        strategy = StorageStrategy(self.profile['strategy'])
+        if strategy == StorageStrategy.LOCAL_FILESYSTEM:
             self.strategy = LocalFilesystemStorageStrategy(self.profile)
-        elif strategy == 'google_drive':
+        elif strategy == StorageStrategy.GOOGLE_DRIVE:
             self.strategy = GoogleDriveStorageStrategy(self.profile)
-        elif strategy == 'aws_s3':
+        elif strategy == StorageStrategy.AWS_S3:
             self.strategy = AWSS3StorageStrategy(self.profile)
         else:
             raise ValueError(f"Unknown storage strategy '{strategy}'")

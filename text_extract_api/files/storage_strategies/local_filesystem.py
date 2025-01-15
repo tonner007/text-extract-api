@@ -1,7 +1,9 @@
 import os
-from storage_strategies.storage_strategy import StorageStrategy
 from datetime import datetime
-from pathlib import Path
+
+
+
+from text_extract_api.files.storage_strategies.storage_strategy import StorageStrategy
 
 def resolve_path(path):
     # Expand `~` to the home directory
@@ -9,6 +11,7 @@ def resolve_path(path):
     # Convert to absolute path, resolving any `..` or `.`
     absolute_path = os.path.abspath(expanded_path)
     return absolute_path
+
 
 class LocalFilesystemStorageStrategy(StorageStrategy):
     def __init__(self, context):
@@ -22,7 +25,7 @@ class LocalFilesystemStorageStrategy(StorageStrategy):
     def _get_subfolder_path(self, file_name):
         if not self.subfolder_names_format:
             return self.base_directory
-        
+
         now = datetime.now()
         subfolder_path = self.format_file_name(file_name, self.subfolder_names_format)
         return os.path.join(self.base_directory, subfolder_path)

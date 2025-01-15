@@ -1,39 +1,50 @@
-import time
-from urllib import parse
-import requests
-from fastapi import FastAPI, Form, Request, UploadFile, File, HTTPException, Body
-from celery.result import AsyncResult
-from storage_manager import StorageManager
-from celery_config import celery
-from tasks import ocr_task, OCR_STRATEGIES
-from hashlib import md5
-import redis
 import os
-from pydantic import BaseModel, Field, field_validator
-import ollama
-import base64
+import pathlib
+import sys
+import time
 from typing import Optional
+
+import ollama
+import redis
+from celery.result import AsyncResult
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException
+from pydantic import BaseModel, Field, field_validator
+
+from text_extract_api.celery_app import app as celery_app
+from text_extract_api.extract.strategies.strategy import Strategy
+from text_extract_api.extract.tasks import ocr_task
+from text_extract_api.files.file_formats.file_format import FileFormat, FileField
+from text_extract_api.files.storage_manager import StorageManager
+
+# Define base path as text_extract_api - required for keeping absolute namespaces
+sys.path.insert(0, str(pathlib.Path(__file__).parent.resolve()))
 
 
 def storage_profile_exists(profile_name: str) -> bool:
-    profile_path = os.path.abspath(os.path.join(os.getenv('STORAGE_PROFILE_PATH', '/storage_profiles'), f'{profile_name}.yaml'))
-    return os.path.isfile(profile_path)
+    profile_path = os.path.abspath(
+        os.path.join(os.getenv('STORAGE_PROFILE_PATH', './storage_profiles'), f'{profile_name}.yaml'))
+    if not os.path.isfile(profile_path) and profile_path.startswith('..'):
+        # backward compability for ../storage_manager in .env
+        sub_profile_path = os.path.normpath(os.path.join('.', profile_path))
+        return os.path.isfile(sub_profile_path)
+    return True
+
 
 app = FastAPI()
-
 # Connect to Redis
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
 
+
 @app.post("/ocr")
 async def ocr_endpoint(
-    strategy: str = Form(...),
-    prompt: str = Form(None),
-    model: str = Form(...),
-    file: UploadFile = File(...),
-    ocr_cache: bool = Form(...),
-    storage_profile: str = Form('default'),
-    storage_filename: str = Form(None)
+        strategy: str = Form(...),
+        prompt: str = Form(None),
+        model: str = Form(...),
+        file: UploadFile = File(...),
+        ocr_cache: bool = Form(...),
+        storage_profile: str = Form('default'),
+        storage_filename: str = Form(None)
 ):
     """
     Endpoint to extract text from an uploaded PDF, Image or Office file using different OCR strategies.
@@ -41,34 +52,35 @@ async def ocr_endpoint(
     """
     # Validate input
     try:
-        OcrFormRequest(strategy=strategy, prompt=prompt, model=model, ocr_cache=ocr_cache, storage_profile=storage_profile, storage_filename=storage_filename)
+        OcrFormRequest(strategy=strategy, prompt=prompt, model=model, ocr_cache=ocr_cache,
+                       storage_profile=storage_profile, storage_filename=storage_filename)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    if file.content_type is not None and file.content_type != 'application/pdf':
-        raise HTTPException(status_code=400, detail="Invalid file type. Only PDFs are supported.")
+    file_binary = await file.read()
+    file_format = FileFormat.from_binary(file_binary)
 
-    pdf_bytes = await file.read()
-
-    # Generate a hash of the document content for caching
-    pdf_hash = md5(pdf_bytes).hexdigest()
-
-    print(f"Processing Document {file.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}")
+    print(
+        f"Processing Document {file_format.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}")
 
     # Asynchronous processing using Celery
-    task = ocr_task.apply_async(args=[pdf_bytes, strategy, file.filename, pdf_hash, ocr_cache, prompt, model, storage_profile, storage_filename])
+    task = ocr_task.apply_async(
+        args=[file_format.binary, strategy, file_format.filename, file_format.hash, ocr_cache, prompt, model,
+              storage_profile,
+              storage_filename])
     return {"task_id": task.id}
+
 
 # this is an alias for /ocr - to keep the backward compatibility
 @app.post("/ocr/upload")
 async def ocr_upload_endpoint(
-    strategy: str = Form(...),
-    prompt: str = Form(None),
-    model: str = Form(...),
-    file: UploadFile = File(...),
-    ocr_cache: bool = Form(...),
-    storage_profile: str = Form('default'),
-    storage_filename: str = Form(None)
+        strategy: str = Form(...),
+        prompt: str = Form(None),
+        model: str = Form(...),
+        file: UploadFile = File(...),
+        ocr_cache: bool = Form(...),
+        storage_profile: str = Form('default'),
+        storage_filename: str = Form(None)
 ):
     """
     Alias endpoint to extract text from an uploaded PDF/Office/Image file using different OCR strategies.
@@ -76,36 +88,28 @@ async def ocr_upload_endpoint(
     """
     return await ocr_endpoint(strategy, prompt, model, file, ocr_cache, storage_profile, storage_filename)
 
+
 class OllamaGenerateRequest(BaseModel):
     model: str
     prompt: str
 
+
 class OllamaPullRequest(BaseModel):
     model: str
+
 
 class OcrRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
     prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
     model: str = Field(..., description="Model to use for the Ollama endpoint")
-    file: str = Field(..., description="Base64 encoded document file")
+    file: FileField = Field(..., description="Base64 encoded document file")
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
     storage_filename: Optional[str] = Field(None, description="Storage filename to use")
 
     @field_validator('strategy')
     def validate_strategy(cls, v):
-        if v not in OCR_STRATEGIES:
-            raise ValueError(f"Unknown strategy '{v}'. Available: marker, tesseract")
-        return v
-
-    @field_validator('file')
-    def validate_file(cls, v):
-        try:
-            file_content = base64.b64decode(v)
-            if not file_content.startswith(b'%PDF'):
-                raise ValueError("Invalid file type. Only PDFs are supported.")
-        except Exception:
-            raise ValueError("Invalid file content. Must be base64 encoded PDF.")
+        Strategy.get_strategy(v)
         return v
 
     @field_validator('storage_profile')
@@ -113,6 +117,7 @@ class OcrRequest(BaseModel):
         if not storage_profile_exists(v):
             raise ValueError(f"Storage profile '{v}' does not exist.")
         return v
+
 
 class OcrFormRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
@@ -124,8 +129,7 @@ class OcrFormRequest(BaseModel):
 
     @field_validator('strategy')
     def validate_strategy(cls, v):
-        if v not in OCR_STRATEGIES:
-            raise ValueError(f"Unknown strategy '{v}'. Available: marker, tesseract")
+        Strategy.get_strategy(v)
         return v
 
     @field_validator('storage_profile')
@@ -133,6 +137,7 @@ class OcrFormRequest(BaseModel):
         if not storage_profile_exists(v):
             raise ValueError(f"Storage profile '{v}' does not exist.")
         return v
+
 
 @app.post("/ocr/request")
 async def ocr_request_endpoint(request: OcrRequest):
@@ -143,28 +148,27 @@ async def ocr_request_endpoint(request: OcrRequest):
     # Validate input
     request_data = request.model_dump()
     try:
-        print(request_data)
         OcrRequest(**request_data)
+        file = FileFormat.from_base64(request.file)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    file_content = base64.b64decode(request.file)
-
-    # Process the file content as needed
-    pdf_hash = md5(file_content).hexdigest()
-
-    print(f"Processing PDF with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}")
+    print(
+        f"Processing {file.mime_type} with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}")
 
     # Asynchronous processing using Celery
-    task = ocr_task.apply_async(args=[file_content, request.strategy, "uploaded_file.pdf", pdf_hash, request.ocr_cache, request.prompt, request.model, request.storage_profile, request.storage_filename])
+    task = ocr_task.apply_async(
+        args=[file.binary, request.strategy, file.filename, file.hash, request.ocr_cache, request.prompt,
+              request.model, request.storage_profile, request.storage_filename])
     return {"task_id": task.id}
+
 
 @app.get("/ocr/result/{task_id}")
 async def ocr_status(task_id: str):
     """
     Endpoint to get the status of an OCR task using task_id.
     """
-    task = AsyncResult(task_id, app=celery)
+    task = AsyncResult(task_id, app=celery_app)
 
     if task.state == 'PENDING':
         return {"state": task.state, "status": "Task is pending..."}
@@ -172,11 +176,12 @@ async def ocr_status(task_id: str):
         task_info = task.info
         if task_info.get('start_time'):
             task_info['elapsed_time'] = time.time() - int(task_info.get('start_time'))
-        return {"state": task.state, "status": task.info.get("status"), "info": task_info } 
+        return {"state": task.state, "status": task.info.get("status"), "info": task_info}
     elif task.state == 'SUCCESS':
         return {"state": task.state, "status": "Task completed successfully.", "result": task.result}
     else:
         return {"state": task.state, "status": str(task.info)}
+
 
 @app.post("/ocr/clear_cache")
 async def clear_ocr_cache():
@@ -185,6 +190,7 @@ async def clear_ocr_cache():
     """
     redis_client.flushdb()
     return {"status": "OCR cache cleared"}
+
 
 @app.get("/storage/list")
 async def list_files(storage_profile: str = 'default'):
@@ -195,6 +201,7 @@ async def list_files(storage_profile: str = 'default'):
     files = storage_manager.list()
     return {"files": files}
 
+
 @app.get("/storage/load")
 async def load_file(file_name: str, storage_profile: str = 'default'):
     """
@@ -204,6 +211,7 @@ async def load_file(file_name: str, storage_profile: str = 'default'):
     content = storage_manager.load(file_name)
     return {"content": content}
 
+
 @app.delete("/storage/delete")
 async def delete_file(file_name: str, storage_profile: str = 'default'):
     """
@@ -212,6 +220,7 @@ async def delete_file(file_name: str, storage_profile: str = 'default'):
     storage_manager = StorageManager(storage_profile)
     storage_manager.delete(file_name)
     return {"status": f"File {file_name} deleted successfully"}
+
 
 @app.post("/llm/pull")
 async def pull_llama(request: OllamaPullRequest):
@@ -226,6 +235,7 @@ async def pull_llama(request: OllamaPullRequest):
         raise HTTPException(status_code=500, detail="Failed to pull Llama model from Ollama API")
 
     return {"status": response.get("status", "Model pulled successfully")}
+
 
 @app.post("/llm/generate")
 async def generate_llama(request: OllamaGenerateRequest):
