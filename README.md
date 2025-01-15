@@ -114,8 +114,7 @@ This command will install all the dependencies - including Redis (via Docker, so
 
 (MAC) - Dependencies
 ```
-brew install poppler
-brew install libmagic
+brew update && brew install libmagic tesseract poppler pkg-config ghostscript ffmpeg automake autoconf
 ```
 
 (Mac) - You need to startup the celery worker
