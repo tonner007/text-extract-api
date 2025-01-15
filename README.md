@@ -52,6 +52,7 @@ To have it up and running please execute the following steps:
 [Download and install Ollama](https://ollama.com/download)
 [Download and install Docker](https://www.docker.com/products/docker-desktop/)
 
+
 > ### Setting Up Ollama on a Remote Host
 > 
 > To connect to an external Ollama instance, set the environment variable: `OLLAMA_HOST=http://address:port`, e.g.:
@@ -111,15 +112,25 @@ run.sh
 
 This command will install all the dependencies - including Redis (via Docker, so it is not entirely docker free method of running `text-extract-api` anyways :)
 
+(MAC) - Dependencies
+```
+brew update && brew install libmagic tesseract poppler pkg-config ghostscript ffmpeg automake autoconf
+```
+
+(Mac) - You need to startup the celery worker
+```
+source .venv/bin/activate && celery -A text_extract_api.celery_app worker --loglevel=info --pool=solo
+```
+
 Then you're good to go with running some CLI commands like:
 
 ```bash
 python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
 ```
 
-### Scalling the parallell processing
+### Scaling the parallell processing
 
-To have multiple tasks runing at once - for concurrent processing please run the following command to start single worker process:
+To have multiple tasks running at once - for concurrent processing please run the following command to start single worker process:
 
 ```bash
 celery -A text_extract_api.tasks worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running
