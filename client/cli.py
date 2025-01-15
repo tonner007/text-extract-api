@@ -120,7 +120,7 @@ def llm_pull(model = 'llama3.1'):
     response = pull(model, stream=True)
     for chunk in response:
       if chunk.completed and chunk.total:
-        print(f'Pulling {model} - {chunk.status} - {math.floor((chunk.completed / chunk.total) * 100)}% completed')
+        print(f'Please wait .... {model} - {chunk.status} - {math.floor((chunk.completed / chunk.total) * 100)}% completed')
       else:
         print(f'Pulling {model} - {chunk.status}')    
 
