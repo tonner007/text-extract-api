@@ -52,11 +52,6 @@ To have it up and running please execute the following steps:
 [Download and install Ollama](https://ollama.com/download)
 [Download and install Docker](https://www.docker.com/products/docker-desktop/)
 
-(MAC) 
-```
-brew install poppler
-brew install libmagic
-```
 
 > ### Setting Up Ollama on a Remote Host
 > 
@@ -116,6 +111,12 @@ run.sh
 ```
 
 This command will install all the dependencies - including Redis (via Docker, so it is not entirely docker free method of running `text-extract-api` anyways :)
+
+(MAC) - Dependencies
+```
+brew install poppler
+brew install libmagic
+```
 
 (Mac) - You need to startup the celery worker
 ```
