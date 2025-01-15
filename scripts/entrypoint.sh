@@ -29,8 +29,8 @@ else
    echo "Starting FastAPI app..."
 
    if [ "$APP_ENV" = "production" ]; then
-      exec uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 &
+      exec uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000
    else
-      exec uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload &
+      exec uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload
    fi
 fi
