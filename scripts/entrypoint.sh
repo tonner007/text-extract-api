@@ -21,22 +21,16 @@ if [ "$APP_TYPE" = "celery" ]; then
    echo "Starting Celery worker..."
    exec celery -A text_extract_api.celery_app worker --loglevel=info --pool=solo
 else
-   echo "Starting FastAPI app..."
-   pid=''
-   if [ "$APP_ENV" = "production" ]; then
-      exec uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 &
-      pid=$!
-   else
-      exec uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload &
-      pid=$!
-   fi
-
-   sleep 5
-   
    echo "Pulling LLM models, please wait until this process is done..."
-   exec python client/cli.py llm_pull --model llama3.1
-   exec python client/cli.py llm_pull --model llama3.2-vision
+   python client/cli.py llm_pull --model llama3.1
+   python client/cli.py llm_pull --model llama3.2-vision
    echo "LLM models are ready!"
 
-   wait $pid
+   echo "Starting FastAPI app..."
+
+   if [ "$APP_ENV" = "production" ]; then
+      exec uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 &
+   else
+      exec uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload &
+   fi
 fi
