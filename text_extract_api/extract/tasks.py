@@ -25,8 +25,9 @@ def ocr_task(
         ocr_cache: bool,
         prompt: str,
         model: str,
+        language: str,
         storage_profile: str,
-        storage_filename: Optional[str] = None
+        storage_filename: Optional[str] = None,
 ):
     """
     Celery task to perform OCR processing on a PDF/Office/image file.
@@ -51,7 +52,7 @@ def ocr_task(
         self.update_state(state='PROGRESS',
                           meta={'progress': 30, 'status': 'Extracting text from PDF', 'start_time': start_time,
                                 'elapsed_time': time.time() - start_time})  # Example progress update
-        extracted_text = strategy.extract_text(FileFormat.from_binary(binary_content))
+        extracted_text = strategy.extract_text(FileFormat.from_binary(binary_content), language)
     else:
         print("Using cached result...")
 

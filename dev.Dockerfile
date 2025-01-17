@@ -8,8 +8,6 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
     && apt-get update --fix-missing \
     && apt-get install -y \
         libgl1-mesa-glx \
-        tesseract-ocr \
-        libtesseract-dev \
         poppler-utils \
         libmagic1 \
         libmagic-dev \

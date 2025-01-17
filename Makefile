@@ -66,12 +66,12 @@ setup-local:
 .PHONY: install-linux
 install-linux:
 	@echo -e "\033[1;34m   Installing Linux dependencies...\033[0m"; \
-	sudo apt update && sudo apt install -y libmagic1 tesseract-ocr poppler-utils pkg-config
+	sudo apt update && sudo apt install -y libmagic1 poppler-utils pkg-config
 
 .PHONY: install-macos
 install-macos:
 	@echo -e "\033[1;34m   Installing macOS dependencies...\033[0m"; \
-	brew update && brew install libmagic tesseract poppler pkg-config ghostscript ffmpeg automake autoconf
+	brew update && brew install libmagic poppler pkg-config ghostscript ffmpeg automake autoconf
 
 .PHONY: install-requirements
 install-requirements:

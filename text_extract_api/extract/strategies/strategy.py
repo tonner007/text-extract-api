@@ -27,7 +27,7 @@ class Strategy:
         raise NotImplementedError("Strategy subclasses must implement name")
 
     @classmethod
-    def extract_text(cls, file_format: Type["FileFormat"]):
+    def extract_text(cls, file_format: Type["FileFormat"], language: str = 'en') -> str:
         raise NotImplementedError("Strategy subclasses must implement extract_text method")
 
     @classmethod

@@ -5,15 +5,15 @@ import easyocr
 
 from text_extract_api.extract.strategies.strategy import Strategy
 from text_extract_api.files.file_formats.file_format import FileFormat
-from text_extract_api.files.file_formats.image_file_format import ImageFileFormat
+from text_extract_api.files.file_formats.image import ImageFileFormat
 
 
-class EasyOCR(Strategy):
+class EasyOCRStrategy(Strategy):
     @classmethod
     def name(cls) -> str:
         return "easyOCR"
 
-    def extract_text(self, file_format: FileFormat) -> str:
+    def extract_text(self, file_format: FileFormat, language: str = 'en') -> str:
         """
         Extract text using EasyOCR after converting the input file to images
         (if not already an ImageFileFormat). 
@@ -33,7 +33,7 @@ class EasyOCR(Strategy):
 
         # Initialize the EasyOCR Reader
         # Add or change languages to your needs, e.g., ['en', 'fr']
-        reader = easyocr.Reader(['en'])
+        reader = easyocr.Reader(language.split(','))
 
         # Process each image, extracting text
         all_extracted_text = []
@@ -45,7 +45,7 @@ class EasyOCR(Strategy):
             np_image = np.array(pil_image)
 
             # Perform OCR; with `detail=0`, we get just text, no bounding boxes
-            ocr_result = reader.readtext(np_image, detail=0)
+            ocr_result = reader.readtext(np_image, detail=0) # TODO: addd bounding boxes support as described in #37
 
             # Combine all lines into a single string for that image/page
             extracted_text = "\n".join(ocr_result)

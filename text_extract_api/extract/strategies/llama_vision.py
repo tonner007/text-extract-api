@@ -16,7 +16,7 @@ class LlamaVisionStrategy(Strategy):
     def name(cls) -> str:
         return "llama_vision"
 
-    def extract_text(self, file_format: FileFormat):
+    def extract_text(self, file_format: FileFormat, language: str = 'en') -> str:
 
         if (
                 not isinstance(file_format, ImageFileFormat)

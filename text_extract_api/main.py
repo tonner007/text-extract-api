@@ -44,7 +44,8 @@ async def ocr_endpoint(
         file: UploadFile = File(...),
         ocr_cache: bool = Form(...),
         storage_profile: str = Form('default'),
-        storage_filename: str = Form(None)
+        storage_filename: str = Form(None),
+        language: str = Form('en')
 ):
     """
     Endpoint to extract text from an uploaded PDF, Image or Office file using different OCR strategies.
@@ -53,7 +54,7 @@ async def ocr_endpoint(
     # Validate input
     try:
         OcrFormRequest(strategy=strategy, prompt=prompt, model=model, ocr_cache=ocr_cache,
-                       storage_profile=storage_profile, storage_filename=storage_filename)
+                       storage_profile=storage_profile, storage_filename=storage_filename, language=language)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -61,11 +62,11 @@ async def ocr_endpoint(
     file_format = FileFormat.from_binary(file_binary)
 
     print(
-        f"Processing Document {file_format.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}")
+        f"Processing Document {file_format.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}, language: {language}")
 
     # Asynchronous processing using Celery
     task = ocr_task.apply_async(
-        args=[file_format.binary, strategy, file_format.filename, file_format.hash, ocr_cache, prompt, model,
+        args=[file_format.binary, strategy, file_format.filename, file_format.hash, ocr_cache, prompt, model, language,
               storage_profile,
               storage_filename])
     return {"task_id": task.id}
@@ -80,13 +81,14 @@ async def ocr_upload_endpoint(
         file: UploadFile = File(...),
         ocr_cache: bool = Form(...),
         storage_profile: str = Form('default'),
-        storage_filename: str = Form(None)
+        storage_filename: str = Form(None),
+        language: str = Form('en')
 ):
     """
     Alias endpoint to extract text from an uploaded PDF/Office/Image file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
     """
-    return await ocr_endpoint(strategy, prompt, model, file, ocr_cache, storage_profile, storage_filename)
+    return await ocr_endpoint(strategy, prompt, model, file, ocr_cache, storage_profile, storage_filename, language)
 
 
 class OllamaGenerateRequest(BaseModel):
@@ -106,6 +108,7 @@ class OcrRequest(BaseModel):
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
     storage_filename: Optional[str] = Field(None, description="Storage filename to use")
+    language: Optional[str] = Field('en', description="Language to use for OCR")
 
     @field_validator('strategy')
     def validate_strategy(cls, v):
@@ -126,6 +129,7 @@ class OcrFormRequest(BaseModel):
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
     storage_filename: Optional[str] = Field(None, description="Storage filename to use")
+    language: Optional[str] = Field('en', description="Language to use for OCR")
 
     @field_validator('strategy')
     def validate_strategy(cls, v):
@@ -154,12 +158,12 @@ async def ocr_request_endpoint(request: OcrRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
     print(
-        f"Processing {file.mime_type} with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}")
+        f"Processing {file.mime_type} with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}, language: {request.language}")
 
     # Asynchronous processing using Celery
     task = ocr_task.apply_async(
         args=[file.binary, request.strategy, file.filename, file.hash, request.ocr_cache, request.prompt,
-              request.model, request.storage_profile, request.storage_filename])
+              request.model, request.language, request.storage_profile, request.storage_filename])
     return {"task_id": task.id}
 
 
