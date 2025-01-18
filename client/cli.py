@@ -17,7 +17,7 @@ def ocr_upload(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1',
     if storage_filename:
         data['storage_filename'] = storage_filename
     
-    print(data)
+    print(data) # @todo change to log debug in the future
 
     try:
         if prompt_file:
