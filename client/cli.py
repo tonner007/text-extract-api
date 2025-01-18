@@ -6,17 +6,19 @@ import os
 import math
 from ollama import pull
 
-def ocr_upload(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1', strategy='llama_vision', storage_profile='default', storage_filename=None):
+def ocr_upload(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1', strategy='llama_vision', storage_profile='default', storage_filename=None, language='en'):
     ocr_url = os.getenv('OCR_UPLOAD_URL', 'http://localhost:8000/ocr/upload')
     files = {'file': open(file_path, 'rb')}
     if not ocr_cache:
         print("OCR cache disabled.")
 
-    data = {'ocr_cache': ocr_cache, 'model': model, 'strategy': strategy, 'storage_profile': storage_profile}
+    data = {'ocr_cache': ocr_cache, 'model': model, 'strategy': strategy, 'storage_profile': storage_profile, 'language': language}
 
     if storage_filename:
         data['storage_filename'] = storage_filename
     
+    print(data) # @todo change to log debug in the future
+
     try:
         if prompt_file:
             prompt = open(prompt_file, 'r').read()
@@ -42,7 +44,7 @@ def ocr_upload(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1',
         print(f"Failed to upload file: {response.text}")
         return None
 
-def ocr_request(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1', strategy='llama_vision', storage_profile='default', storage_filename=None):
+def ocr_request(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1', strategy='llama_vision', storage_profile='default', storage_filename=None, language='en'):
     ocr_url = os.getenv('OCR_REQUEST_URL', 'http://localhost:8000/ocr/request')
     with open(file_path, 'rb') as f:
         file_content = base64.b64encode(f.read()).decode('utf-8')
@@ -52,7 +54,8 @@ def ocr_request(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1'
         'model': model,
         'strategy': strategy,
         'storage_profile': storage_profile,
-        'file': file_content
+        'file': file_content,
+        'language': language
     }
 
     if storage_filename:
@@ -175,6 +178,7 @@ def main():
     ocr_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
     ocr_parser.add_argument('--storage_profile', type=str, default='default', help='Storage profile to use for the file')
     ocr_parser.add_argument('--storage_filename', type=str, default=None, help='Storage filename to use for the file. You may use some formatting - see the docs')
+    ocr_parser.add_argument('--language', type=str, default='en', help='Language to use for the OCR task')
     #ocr_parser.add_argument('--async_mode', action='store_true', help='Enable async mode for the OCR task')
 
     # Sub-command for uploading a file via file upload - @deprecated - it's a backward compatibility gimmick
@@ -189,6 +193,7 @@ def main():
     ocr_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
     ocr_parser.add_argument('--storage_profile', type=str, default='default', help='Storage profile to use for the file')
     ocr_parser.add_argument('--storage_filename', type=str, default=None, help='Storage filename to use for the file. You may use some formatting - see the docs')
+    ocr_parser.add_argument('--language', type=str, default='en', help='Language to use for the OCR task')
     #ocr_parser.add_argument('--async_mode', action='store_true', help='Enable async mode for the OCR task')
 
 
@@ -204,6 +209,7 @@ def main():
     ocr_request_parser.add_argument('--print_progress', default=True, action='store_true', help='Print the progress of the OCR task')
     ocr_request_parser.add_argument('--storage_profile', type=str, default='default', help='Storage profile to use. You may use some formatting - see the docs')
     ocr_request_parser.add_argument('--storage_filename', type=str, default=None, help='Storage filename to use')
+    ocr_request_parser.add_argument('--language', type=str, default='en', help='Language to use for the OCR task')
 
     # Sub-command for getting the result
     result_parser = subparsers.add_parser('result', help='Get the OCR result by specified task id.')
@@ -239,7 +245,7 @@ def main():
 
     if args.command == 'ocr' or args.command == 'ocr_upload':
         print(args)
-        result = ocr_upload(args.file, False if args.disable_ocr_cache else args.ocr_cache, args.prompt, args.prompt_file, args.model, args.strategy, args.storage_profile, args.storage_filename)
+        result = ocr_upload(args.file, False if args.disable_ocr_cache else args.ocr_cache, args.prompt, args.prompt_file, args.model, args.strategy, args.storage_profile, args.storage_filename, args.language)
         if result is None:
             print("Error uploading file.")
             return
@@ -251,7 +257,7 @@ def main():
             if text_result:
                 print(text_result)
     elif args.command == 'ocr_request':
-        result = ocr_request(args.file, False if args.disable_ocr_cache else args.ocr_cache, args.prompt, args.prompt_file, args.model, args.strategy, args.storage_profile, args.storage_filename)
+        result = ocr_request(args.file, False if args.disable_ocr_cache else args.ocr_cache, args.prompt, args.prompt_file, args.model, args.strategy, args.storage_profile, args.storage_filename, args.language)
         if result is None:
             print("Error uploading file.")
             return

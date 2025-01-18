@@ -7,8 +7,8 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 ![hero doc extract](ocr-hero.webp)
 
 ## Features:
-- **No Cloud/external dependencies** all you need: PyTorch based OCR (Marker) + Ollama are shipped and configured via `docker-compose` no data is sent outside your dev/server environment,
-- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [marker](https://github.com/VikParuchuri/marker) and [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [surya-ocr](https://github.com/VikParuchuri/surya) or [tessereact](https://github.com/h/pytesseract)
+- **No Cloud/external dependencies** all you need: PyTorch based OCR (EasyOCR) + Ollama are shipped and configured via `docker-compose` no data is sent outside your dev/server environment,
+- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [easyOCR](https://github.com/JaidedAI/EasyOCR)
 - **PDF/Office to JSON** conversion using Ollama supported models (eg. LLama 3.1)
 - **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
 - **Removing PII** This tool can be used for removing Personally Identifiable Information out of document - see `examples`
@@ -38,8 +38,6 @@ python client/cli.py ocr_upload --file examples/example-invoice.pdf --prompt_fil
 Before running the example see [getting started](#getting-started)
 
 ![Converting Invoice to JSON](./screenshots/example-2.png)
-
-**Note:** As you may observe in the example above, `marker-pdf` sometimes mismatches the cols and rows which could have potentially great impact on data accuracy. To improve on it there is a feature request [#3](https://github.com/CatchTheTornado/text-extract-api/issues/3) for adding alternative support for [`tabled`](https://github.com/VikParuchuri/tabled) model - which is optimized for tables.
 
 ## Getting started
 
@@ -114,7 +112,7 @@ This command will install all the dependencies - including Redis (via Docker, so
 
 (MAC) - Dependencies
 ```
-brew update && brew install libmagic tesseract poppler pkg-config ghostscript ffmpeg automake autoconf
+brew update && brew install libmagic poppler pkg-config ghostscript ffmpeg automake autoconf
 ```
 
 (Mac) - You need to startup the celery worker
@@ -312,8 +310,10 @@ python client/cli.py llm_pull --model llama3.2-vision
 and only after to run this specific prompt query:
 
 ```bash
-python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt
+python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --prompt_file=examples/example-mri-remove-pii.txt --language en
 ```
+
+**Note:** The language argument is used for the OCR strategy to load the model weights for the selected language. You can specify multiple languages as a list: `en,de,pl` etc.
 
 The `ocr` command can store the results using the `storage_profiles`:
   - **storage_profile**: Used to save the result - the `default` profile (`./storage_profiles/default.yaml`) is used by default; if empty file is not saved
@@ -410,17 +410,18 @@ apiClient.uploadFile(formData).then(response => {
 - **Method**: POST
 - **Parameters**:
   - **file**: PDF, image or Office file to be processed.
-  - **strategy**: OCR strategy to use (`marker`, `llama_vision` or `tesseract`).
+  - **strategy**: OCR strategy to use (`llama_vision` or `easyocr`).
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result
   - **model**: When provided along with the prompt - this model will be used for LLM processing
   - **storage_profile**: Used to save the result - the `default` profile (`./storage_profiles/default.yaml`) is used by default; if empty file is not saved
   - **storage_filename**: Outputting filename - relative path of the `root_path` set in the storage profile - by default a relative path to `/storage` folder; can use placeholders for dynamic formatting: `{file_name}`, `{file_extension}`, `{Y}`, `{mm}`, `{dd}` - for date formatting, `{HH}`, `{MM}`, `{SS}` - for time formatting
+  - **language**: One or many (`en` or `en,pl,de`) language codes for the OCR to load the language weights
 
 Example:
 
 ```bash
-curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=marker" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8000/ocr/upload" 
+curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=easyocr" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8000/ocr/upload" 
 ```
 
 ### OCR Endpoint via JSON request
@@ -428,19 +429,20 @@ curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-m
 - **Method**: POST
 - **Parameters** (JSON body):
   - **file**: Base64 encoded PDF file content.
-  - **strategy**: OCR strategy to use (`marker`, `llama_vision` or `tesseract`).
+  - **strategy**: OCR strategy to use (`llama_vision` or `easyocr`).
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result.
   - **model**: When provided along with the prompt - this model will be used for LLM processing.
   - **storage_profile**: Used to save the result - the `default` profile (`/storage_profiles/default.yaml`) is used by default; if empty file is not saved.
   - **storage_filename**: Outputting filename - relative path of the `root_path` set in the storage profile - by default a relative path to `/storage` folder; can use placeholders for dynamic formatting: `{file_name}`, `{file_extension}`, `{Y}`, `{mm}`, `{dd}` - for date formatting, `{HH}`, `{MM}`, `{SS}` - for time formatting.
+  - **language**: One or many (`en` or `en,pl,de`) language codes for the OCR to load the language weights
 
 Example:
 
 ```bash
 curl -X POST "http://localhost:8000/ocr/request" -H "Content-Type: application/json" -d '{
   "file": "<base64-encoded-file-content>",
-  "strategy": "marker",
+  "strategy": "easyocr",
   "ocr_cache": true,
   "prompt": "",
   "model": "llama3.1",
@@ -598,13 +600,7 @@ AWS_S3_BUCKET_NAME=your-bucket-name
 ```
 
 ## License
-This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE) file for details.
-
-**Important note on [marker](https://github.com/VikParuchuri/marker) license***:
-
-The weights for the models are licensed `cc-by-nc-sa-4.0`, but Marker's author will waive that for any organization under $5M USD in gross revenue in the most recent 12-month period AND under $5M in lifetime VC/angel funding raised. You also must not be competitive with the [Datalab API](https://www.datalab.to/). If you want to remove the GPL license requirements (dual-license) and/or use the weights commercially over the revenue limit, check out the options [here](https://www.datalab.to/).
-
-
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
 In case of any questions please contact us at: info@catchthetornado.com
