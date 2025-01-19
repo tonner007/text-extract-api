@@ -17,6 +17,7 @@ RUN apt-get update && \
     python3-pip \
     libgl1 \
     libglib2.0-0 \
+    libglib2.0-dev \
     curl \
     gnupg2 \
     ca-certificates \

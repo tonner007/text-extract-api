@@ -53,7 +53,18 @@ echo "Your ENV settings loaded from .env.localhost file: "
 printenv
 
 CELERY_BIN="$(pwd)/.venv/bin/celery"
-CELERY_PID=$(pgrep -f "$CELERY_BIN")
+CELERY_PIDS=$(pgrep -f "$CELERY_BIN")
+
+if [ -n "$CELERY_PIDS" ]; then
+  echo "Killing existing Celery processes from $CELERY_BIN with PIDs:"
+  echo "$CELERY_PIDS"
+  for PID in $CELERY_PIDS; do
+    kill "$PID" || echo "Failed to kill process with PID: $PID"
+  done
+else
+  echo "No running Celery process found."
+fi
+
 REDIS_PORT=6379 # will move it to .envs in near future
 
 if lsof -i :$REDIS_PORT | grep LISTEN >/dev/null; then

@@ -7,6 +7,8 @@ RUN echo 'Acquire::http::Pipeline-Depth 0;\nAcquire::http::No-Cache true;\nAcqui
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
     && apt-get update --fix-missing \
     && apt-get install -y \
+        libglib2.0-0 \
+        libglib2.0-dev \
         libgl1-mesa-glx \
         poppler-utils \
         libmagic1 \
