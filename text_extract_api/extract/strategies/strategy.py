@@ -7,6 +7,7 @@ from typing import Type, Dict
 
 from pydantic.v1.typing import get_class
 
+from extract.extract_result import ExtractResult
 from text_extract_api.files.file_formats.file_format import FileFormat
 
 class Strategy:
@@ -27,7 +28,7 @@ class Strategy:
         raise NotImplementedError("Strategy subclasses must implement name")
 
     @classmethod
-    def extract_text(cls, file_format: Type["FileFormat"], language: str = 'en') -> str:
+    def extract_text(cls, file_format: Type["FileFormat"], language: str = 'en') -> ExtractResult:
         raise NotImplementedError("Strategy subclasses must implement extract_text method")
 
     @classmethod
