@@ -188,6 +188,37 @@ LLama 3.2 Vision Strategy is licensed on [Meta Community License Agreement](http
 
 Enabled by default. Please do use the `strategy=llama_vision` CLI and URL parameters to use it. It's by the way the default strategy
 
+
+### `marker`
+
+[Marker, state of the art PDF OCR](https://github.com/VikParuchuri/marker) - works really great for more than 50 languages, including great accuracy for Polish and other languages - let's say that are "diffult" to read for standard OCR.
+
+The `marker-pdf` is however licensed on GPL3 license and **therefore it's not included** by default in this application (as we're bound to MIT). 
+
+The weights for the models are licensed cc-by-nc-sa-4.0, but I will waive that for any organization under $5M USD in gross revenue in the most recent 12-month period AND under $5M in lifetime VC/angel funding raised. You also must not be competitive with the Datalab API. If you want to remove the GPL license requirements (dual-license) and/or use the weights commercially over the revenue limit, check out the options here.
+
+To have it up and running please execute the following steps:
+
+```bash
+pip install marker-pdf
+pip install -U uvicorn fastapi python-multipart
+marker_server --port 8002
+```
+
+**Note: *** you might run `marker_server` on different port - then just make sure you export a proper env setting beffore starting off `text-extract-api` server:
+
+```bash
+export MARKER_API_URL=http://localhost:8002/marker/upload
+```
+
+Please do use the `strategy=marker` CLI and URL parameters to use it. For example:
+
+```bash
+curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=marker" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8000/ocr/upload" 
+```
+
+We are connecting to marker via it's API to not share the same license (GPL3) by having it all linked on the source code level.
+
 ## Getting started with Docker
 
 ### Prerequisites
