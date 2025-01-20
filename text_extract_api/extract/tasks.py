@@ -23,10 +23,10 @@ def ocr_task(
         filename: str,
         file_hash: str,
         ocr_cache: bool,
-        prompt: str,
-        model: str,
-        language: str,
-        storage_profile: str,
+        prompt: Optional[str] = None,
+        model: Optional[str] = None,
+        language: Optional[str] = None,
+        storage_profile: Optional[str] = None,
         storage_filename: Optional[str] = None,
 ):
     """
@@ -85,7 +85,7 @@ def ocr_task(
 
     if storage_profile:
         if not storage_filename:
-            storage_filename = filename.replace('.pdf', '.md')
+            storage_filename = filename.replace('.', '_') + '.pdf'
 
         storage_manager = StorageManager(storage_profile)
         storage_manager.save(filename, storage_filename, extracted_text)
