@@ -162,6 +162,32 @@ python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --pr
 
 In case of any questions, help requests or just feedback - please [join us on Discord](https://discord.gg/NJzu47Ye3a)!
 
+
+## Text extract stratgies
+
+### `easyocr`
+
+Easy OCR is avaialble on Apache based license. It's general purpose OCR with support for more than 30 langues, probably with the best performance for English.
+
+Enabled by default. Please do use the `strategy=easyocr` CLI and URL parameters to use it.
+
+
+### `minicpm-v` 
+
+MiniCPM-V is Apache based licenseed OCR strategy.
+
+The usage of MiniCPM-o/V model weights must strictly follow [MiniCPM Model License.md](https://github.com/OpenBMB/MiniCPM/blob/main/MiniCPM%20Model%20License.md).
+
+The models and weights of MiniCPM are completely free for academic research. after filling out a ["questionnaire"](https://modelbest.feishu.cn/share/base/form/shrcnpV5ZT9EJ6xYjh3Kx0J6v8g) for registration, are also available for free commercial use.
+
+Enabled by default. Please do use the `strategy=minicpm_v` CLI and URL parameters to use it.
+
+### `llama_vision` 
+
+LLama 3.2 Vision Strategy is licensed on [Meta Community License Agreement](https://ollama.com/library/llama3.2-vision/blobs/0b4284c1f870). Works great for many languages, although due to the number of parameters (90b) this model is probably **the slowest** one.
+
+Enabled by default. Please do use the `strategy=llama_vision` CLI and URL parameters to use it. It's by the way the default strategy
+
 ## Getting started with Docker
 
 ### Prerequisites
