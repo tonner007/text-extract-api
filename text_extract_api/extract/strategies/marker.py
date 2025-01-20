@@ -45,7 +45,7 @@ class MarkerStrategy(Strategy):
                 'languages': language,
                 'force_ocr': False,
                 'paginate_output': False,
-                'output_format': 'json' # TODO: support JSON output format
+                'output_format': 'markdown' # TODO: support JSON output format
             }
 
             meta = {
