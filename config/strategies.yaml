@@ -5,3 +5,5 @@ strategies:
       class: text_extract_api.extract.strategies.minicpm_v.MiniCPMVStrategy
    easyocr:
       class: text_extract_api.extract.strategies.easyocr.EasyOCRStrategy
+   marker:
+      class: text_extract_api.extract.strategies.marker.MarkerStrategy
