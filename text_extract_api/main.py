@@ -58,11 +58,12 @@ async def ocr_endpoint(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    filename = storage_filename if storage_filename else file.filename
     file_binary = await file.read()
-    file_format = FileFormat.from_binary(file_binary)
+    file_format = FileFormat.from_binary(file_binary, filename, file.content_type)
 
     print(
-        f"Processing Document {file_format.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}, language: {language}")
+        f"Processing Document {file_format.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}, language: {language}, will be saved as: {filename}")
 
     # Asynchronous processing using Celery
     task = ocr_task.apply_async(
@@ -153,7 +154,7 @@ async def ocr_request_endpoint(request: OcrRequest):
     request_data = request.model_dump()
     try:
         OcrRequest(**request_data)
-        file = FileFormat.from_base64(request.file)
+        file = FileFormat.from_base64(request.file, request.storage_filename)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

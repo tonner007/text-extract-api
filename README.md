@@ -447,7 +447,7 @@ curl -X POST "http://localhost:8000/ocr/request" -H "Content-Type: application/j
   "prompt": "",
   "model": "llama3.1",
   "storage_profile": "default",
-  "storage_filename": "example.pdf"
+  "storage_filename": "example.md"
 }'
 ```
 
