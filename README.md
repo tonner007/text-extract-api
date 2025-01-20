@@ -8,7 +8,7 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 
 ## Features:
 - **No Cloud/external dependencies** all you need: PyTorch based OCR (EasyOCR) + Ollama are shipped and configured via `docker-compose` no data is sent outside your dev/server environment,
-- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [easyOCR](https://github.com/JaidedAI/EasyOCR), [minicpm-v](https://github.com/OpenBMB/MiniCPM-o?tab=readme-ov-file#minicpm-v-26)
+- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [easyOCR](https://github.com/JaidedAI/EasyOCR), [minicpm-v](https://github.com/OpenBMB/MiniCPM-o?tab=readme-ov-file#minicpm-v-26), [marker-pdf](https://github.com/VikParuchuri/marker)
 - **PDF/Office to JSON** conversion using Ollama supported models (eg. LLama 3.1)
 - **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
 - **Removing PII** This tool can be used for removing Personally Identifiable Information out of document - see `examples`
@@ -467,7 +467,7 @@ apiClient.uploadFile(formData).then(response => {
 - **Method**: POST
 - **Parameters**:
   - **file**: PDF, image or Office file to be processed.
-  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v` or `easyocr`).
+  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v`, `marker` or `easyocr`). See the [available strategies](#text-extract-stratgies)
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result
   - **model**: When provided along with the prompt - this model will be used for LLM processing
@@ -486,7 +486,7 @@ curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-m
 - **Method**: POST
 - **Parameters** (JSON body):
   - **file**: Base64 encoded PDF file content.
-  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v` or `easyocr`).
+  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v`, marker or `easyocr`). See the [available strategies](#text-extract-stratgies)
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result.
   - **model**: When provided along with the prompt - this model will be used for LLM processing.
