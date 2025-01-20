@@ -78,7 +78,7 @@ async def ocr_endpoint(
 async def ocr_upload_endpoint(
         strategy: str = Form(...),
         prompt: str = Form(None),
-        model: str = Form(...),
+        model: str = Form(None),
         file: UploadFile = File(...),
         ocr_cache: bool = Form(...),
         storage_profile: str = Form('default'),
@@ -104,7 +104,7 @@ class OllamaPullRequest(BaseModel):
 class OcrRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
     prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
-    model: str = Field(..., description="Model to use for the Ollama endpoint")
+    model: Optional[str] = Field(None, description="Model to use for the Ollama endpoint")
     file: FileField = Field(..., description="Base64 encoded document file")
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
@@ -126,7 +126,7 @@ class OcrRequest(BaseModel):
 class OcrFormRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
     prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
-    model: str = Field(..., description="Model to use for the Ollama endpoint")
+    model: Optional[str] = Field(None, description="Model to use for the Ollama endpoint")
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
     storage_filename: Optional[str] = Field(None, description="Storage filename to use")
