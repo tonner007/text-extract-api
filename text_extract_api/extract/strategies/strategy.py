@@ -12,9 +12,14 @@ from text_extract_api.files.file_formats.file_format import FileFormat
 
 class Strategy:
     _strategies: Dict[str, Strategy] = {}
+    _strategy_config: Dict[str, Dict] = {}
 
     def __init__(self):
         self.update_state_callback = None
+        self._strategy_config = None
+
+    def set_strategy_config(self, config: Dict):
+        self._strategy_config = config
 
     def set_update_state_callback(self, callback):
         self.update_state_callback = callback
@@ -88,8 +93,10 @@ class Strategy:
             module = importlib.import_module(module_path)
 
             strategy = getattr(module, class_name)
-
-            cls.register_strategy(strategy(), strategy_name)
+            strategy_instance = strategy()
+            strategy_instance.set_strategy_config(strategy_config)
+            
+            cls.register_strategy(strategy_instance, strategy_name)
             print(f"Loaded strategy from {config_file_path} {strategy_name} [{strategy_class_path}]")
 
         return strategies
