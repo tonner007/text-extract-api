@@ -2,6 +2,8 @@ import os
 import tempfile
 import time
 
+from extract.extract_result import ExtractResult
+
 from text_extract_api.extract.strategies.strategy import Strategy
 from text_extract_api.files.file_formats.file_format import FileFormat
 from text_extract_api.files.file_formats.image import ImageFileFormat
@@ -9,14 +11,14 @@ from text_extract_api.files.file_formats.pdf import PdfFileFormat
 import requests
 
 
-class MarkerStrategy(Strategy):
-    """Marker PDF via API - strategy"""
+class RemoteStrategy(Strategy):
+    """Remote API Strategy"""
 
     @classmethod
     def name(cls) -> str:
         return "marker"
 
-    def extract_text(self, file_format: FileFormat, language: str = 'en') -> str:
+    def extract_text(self, file_format: FileFormat, language: str = 'en') -> ExtractResult:
 
         if (
                 not isinstance(file_format, PdfFileFormat)
@@ -38,7 +40,7 @@ class MarkerStrategy(Strategy):
             raise ValueError("No PDF file found - conversion error.")
 
         try: 
-            url = os.getenv("MARKER_API_URL", "http://localhost:8002/marker/upload")
+            url = os.getenv("REMOTE_API_URL", "http://localhost:8002/marker/upload")
             files = {'file': ('document.pdf', pdf_files[0].binary, 'application/pdf')}
             data = {
                 'page_range': None,
@@ -64,4 +66,4 @@ class MarkerStrategy(Strategy):
             print('Error:', e)
             raise Exception("Failed to generate text with Marker PDF API. Make sure marker-pdf server is up and running: marker_server --port 8002. Details: https://github.com/VikParuchuri/marker")
             
-        return extracted_text
+        return ExtractResult.from_text(extracted_text)
