@@ -40,7 +40,7 @@ class RemoteStrategy(Strategy):
             raise ValueError("No PDF file found - conversion error.")
 
         try: 
-            url = os.getenv("REMOTE_API_URL", "")
+            url = os.getenv("REMOTE_API_URL", self._strategy_config.get("url"))
             if not url:
                 raise Exception('Please do set the REMOTE_API_URL environment variable: export REMOTE_API_URL=http://...')
             files = {'file': ('document.pdf', pdf_files[0].binary, 'application/pdf')}

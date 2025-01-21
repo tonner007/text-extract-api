@@ -223,6 +223,8 @@ Set the Remote API Url:
 export REMOTE_API_URL=http://localhost:8002/marker/upload
 ```
 
+**Note: *** the URL might be also set via `/config/strategies.yaml` file
+
 Run the `text-extract-api`:
 
 ```bash
