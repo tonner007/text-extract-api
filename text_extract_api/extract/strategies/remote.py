@@ -16,7 +16,7 @@ class RemoteStrategy(Strategy):
 
     @classmethod
     def name(cls) -> str:
-        return "marker"
+        return "remote"
 
     def extract_text(self, file_format: FileFormat, language: str = 'en') -> ExtractResult:
 
@@ -40,7 +40,9 @@ class RemoteStrategy(Strategy):
             raise ValueError("No PDF file found - conversion error.")
 
         try: 
-            url = os.getenv("REMOTE_API_URL", "http://localhost:8002/marker/upload")
+            url = os.getenv("REMOTE_API_URL", "")
+            if not url:
+                raise Exception('Please do set the REMOTE_API_URL environment variable: export REMOTE_API_URL=http://...')
             files = {'file': ('document.pdf', pdf_files[0].binary, 'application/pdf')}
             data = {
                 'page_range': None,
@@ -64,6 +66,6 @@ class RemoteStrategy(Strategy):
             extracted_text = response.json().get('output', '')
         except Exception as e:
             print('Error:', e)
-            raise Exception("Failed to generate text with Marker PDF API. Make sure marker-pdf server is up and running: marker_server --port 8002. Details: https://github.com/VikParuchuri/marker")
+            raise Exception("Failed to generate text with Remote API. Make sure the remote server is up and running")
             
         return ExtractResult.from_text(extracted_text)

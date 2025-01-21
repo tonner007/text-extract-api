@@ -6,4 +6,4 @@ strategies:
    easyocr:
       class: text_extract_api.extract.strategies.easyocr.EasyOCRStrategy
    remote:
-      class: text_extract_api.extract.strategies.marker.RemoteStrategy
+      class: text_extract_api.extract.strategies.remote.RemoteStrategy

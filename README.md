@@ -8,7 +8,7 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 
 ## Features:
 - **No Cloud/external dependencies** all you need: PyTorch based OCR (EasyOCR) + Ollama are shipped and configured via `docker-compose` no data is sent outside your dev/server environment,
-- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [easyOCR](https://github.com/JaidedAI/EasyOCR), [minicpm-v](https://github.com/OpenBMB/MiniCPM-o?tab=readme-ov-file#minicpm-v-26), [marker-pdf](https://github.com/VikParuchuri/marker)
+- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [easyOCR](https://github.com/JaidedAI/EasyOCR), [minicpm-v](https://github.com/OpenBMB/MiniCPM-o?tab=readme-ov-file#minicpm-v-26), remote URL strategies including [marker-pdf](https://github.com/VikParuchuri/marker)
 - **PDF/Office to JSON** conversion using Ollama supported models (eg. LLama 3.1)
 - **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
 - **Removing PII** This tool can be used for removing Personally Identifiable Information out of document - see `examples`
@@ -215,10 +215,18 @@ pip install -U uvicorn fastapi python-multipart
 marker_server --port 8002
 ```
 
-**Note: *** you might run `marker_server` on different port - then just make sure you export a proper env setting beffore starting off `text-extract-api` server:
+Set the Remote API Url:
+
+**Note: *** you might run `marker_server` on different port or server - then just make sure you export a proper env setting beffore starting off `text-extract-api` server:
 
 ```bash
 export REMOTE_API_URL=http://localhost:8002/marker/upload
+```
+
+Run the `text-extract-api`:
+
+```bash
+make run
 ```
 
 Please do use the `strategy=remote` CLI and URL parameters to use it. For example:
@@ -477,7 +485,7 @@ apiClient.uploadFile(formData).then(response => {
 - **Method**: POST
 - **Parameters**:
   - **file**: PDF, image or Office file to be processed.
-  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v`, `marker` or `easyocr`). See the [available strategies](#text-extract-stratgies)
+  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v`, `remote` or `easyocr`). See the [available strategies](#text-extract-stratgies)
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result
   - **model**: When provided along with the prompt - this model will be used for LLM processing
@@ -496,7 +504,7 @@ curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-m
 - **Method**: POST
 - **Parameters** (JSON body):
   - **file**: Base64 encoded PDF file content.
-  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v`, marker or `easyocr`). See the [available strategies](#text-extract-stratgies)
+  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v`, `remote` or `easyocr`). See the [available strategies](#text-extract-stratgies)
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result.
   - **model**: When provided along with the prompt - this model will be used for LLM processing.

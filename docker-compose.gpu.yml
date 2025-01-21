@@ -19,6 +19,7 @@ services:
       - LOAD_FILE_URL=${LOAD_FILE_URL-http://localhost:8000/storage/load}
       - DELETE_FILE_URL=${DELETE_FILE_URL-http://localhost:8000/storage/delete}
       - LLAMA_VISION_PROMPT=${LLAMA_VISION_PROMPT-"You are OCR. Convert image to markdown."}
+      - REMOTE_API_URL=${REMOTE_API_URL}
     depends_on:
       - redis
       - ollama
