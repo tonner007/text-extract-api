@@ -182,6 +182,14 @@ The models and weights of MiniCPM are completely free for academic research. aft
 
 Enabled by default. Please do use the `strategy=minicpm_v` CLI and URL parameters to use it.
 
+| ⚠️ **Remember to pull the model in Ollama first**       |
+|---------------------------------------------------------|
+| You need to pull the model in Ollama - use the command: |
+| `python client/cli.py llm_pull --model minicpm-v`       |
+| Or, if you have Ollama locally: `ollama pull minicpm-v` |
+
+
+
 ### `llama_vision` 
 
 LLama 3.2 Vision Strategy is licensed on [Meta Community License Agreement](https://ollama.com/library/llama3.2-vision/blobs/0b4284c1f870). Works great for many languages, although due to the number of parameters (90b) this model is probably **the slowest** one.
@@ -504,7 +512,7 @@ curl -X POST "http://localhost:8000/ocr/request" -H "Content-Type: application/j
   "prompt": "",
   "model": "llama3.1",
   "storage_profile": "default",
-  "storage_filename": "example.pdf"
+  "storage_filename": "example.md"
 }'
 ```
 

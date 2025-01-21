@@ -4,6 +4,7 @@ import time
 
 import ollama
 
+from extract.extract_result import ExtractResult
 from text_extract_api.extract.strategies.strategy import Strategy
 from text_extract_api.files.file_formats.file_format import FileFormat
 from text_extract_api.files.file_formats.image import ImageFileFormat
@@ -16,7 +17,7 @@ class MiniCPMVStrategy(Strategy):
     def name(cls) -> str:
         return "minicpm_v"
 
-    def extract_text(self, file_format: FileFormat, language: str = 'en') -> str:
+    def extract_text(self, file_format: FileFormat, language: str = 'en') -> ExtractResult:
 
         if (
                 not isinstance(file_format, ImageFileFormat)
@@ -66,4 +67,4 @@ class MiniCPMVStrategy(Strategy):
 
             print(response)
 
-        return extracted_text
+        return ExtractResult.from_text(extracted_text)
