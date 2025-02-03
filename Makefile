@@ -123,9 +123,9 @@ run-docker-gpu:
 clean:
 	@echo "Cleaning project..."; \
 	docker-compose down -v; \
-	$(MAKE) clean-cache
+	$(MAKE) clear-cache
 
 .PHONY: clean-python-cache
-clean-cache:
+clear-cache:
 	find . -type d -name '__pycache__' -exec rm -rf {} + && find . -type f -name '*.pyc' -delete
 
